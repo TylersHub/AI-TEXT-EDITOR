@@ -1,2 +1,3 @@
-# AI-TEXT-EDITOR
-A group project based on an AI text-editor for CSC 322 Software Engineering Course
+# HungryText
+
+A group project based on an LLM-powered text editor, for CCNY's CSC 322 Software Engineering course.
