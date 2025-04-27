@@ -1,5 +1,4 @@
-from PyQt6.QtCore import Qt
-from PyQt6.QtWidgets import QApplication, QMainWindow, QStackedWidget, QWidget, QPushButton, QVBoxLayout
+from PyQt6.QtWidgets import QApplication, QMainWindow, QStackedWidget
 import sys
 
 class MainWindow(QMainWindow):
@@ -11,7 +10,16 @@ class MainWindow(QMainWindow):
         self.central_widget = QStackedWidget()
         self.setCentralWidget(self.central_widget)
 
+        self.pages = {}
+        # Ex: self.pages["SignIn"] = SignInPage()
+
+        for page in self.pages.values():
+            self.central_widget.addWidget(page)
+
         self.showMaximized()
+
+    def switch_to_page(self, page: str):
+        self.central_widget.setCurrentWidget(self.pages[page])
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
