@@ -1,9 +1,5 @@
-from PyQt6.QtWidgets import QWidget
-from PyQt6.QtCore import Qt
+from util_widgets import Page
 
-class SignInPage(QWidget):
+class SignInPage(Page):
     def __init__(self):
         super().__init__()
-
-        self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
-        self.setStyleSheet("background-color: white;")
