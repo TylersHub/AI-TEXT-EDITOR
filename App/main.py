@@ -1,6 +1,8 @@
 from PyQt6.QtWidgets import QApplication, QMainWindow, QStackedWidget
 import sys
 
+from page_sign_in import SignInPage
+
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -10,8 +12,9 @@ class MainWindow(QMainWindow):
         self.central_widget = QStackedWidget()
         self.setCentralWidget(self.central_widget)
 
-        self.pages = {}
-        # Ex: self.pages["SignIn"] = SignInPage()
+        self.pages = {
+            "SignIn": SignInPage()
+        }
 
         for page in self.pages.values():
             self.central_widget.addWidget(page)
