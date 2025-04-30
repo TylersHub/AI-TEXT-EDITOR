@@ -1,4 +1,5 @@
 from PyQt6.QtWidgets import QApplication, QMainWindow, QStackedWidget
+from PyQt6.QtCore import Qt
 import sys
 
 from page_sign_in import SignInPage
@@ -8,6 +9,7 @@ class MainWindow(QMainWindow):
         super().__init__()
 
         self.setWindowTitle("HungryText")
+        self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
 
         self.central_widget = QStackedWidget()
         self.setCentralWidget(self.central_widget)
