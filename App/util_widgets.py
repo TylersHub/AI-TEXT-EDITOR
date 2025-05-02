@@ -38,6 +38,8 @@ class InputWarningLabel(QLabel):
     def __init__(self, text: str = None):
         super().__init__(text)
 
+        self.is_text_visible = False
+
         self.setStyleSheet(
             f"{type(self).__name__} {{"
             "color: transparent;"
@@ -47,8 +49,10 @@ class InputWarningLabel(QLabel):
 
     def toggle_text(self, show_text: bool):
         if show_text: 
+            self.is_text_visible = True
             self.setStyleSheet(f"{type(self).__name__} {{ color: red; }}")
         else:
+            self.is_text_visible = False
             self.setStyleSheet(f"{type(self).__name__} {{ color: transparent; }}")
 
 class InputField(QLineEdit):
