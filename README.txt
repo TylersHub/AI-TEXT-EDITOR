@@ -1,11 +1,14 @@
-LLM-Powered Editor App
-=======================
+# HungryText
 
-INSTRUCTIONS:
-1. Double-click EditorApp.exe to start.
+A group project based on an LLM-powered text editor, for CCNY's Spring 2025 Software Engineering course.
+
+
+
+Intended Instructions when app is finished:
+1. Double-click HungryText.exe to start.
 2. The app will automatically:
-   - Start its own Ollama instance
+   - Download Ollama
    - Pull the model (e.g., llama3.2) on first run
-   - Run completely offline after that
+   - Install HungryText Application
 
 No Python installation or command line required.
