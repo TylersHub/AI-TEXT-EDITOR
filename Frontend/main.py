@@ -3,6 +3,7 @@ from PyQt6.QtCore import Qt
 import sys
 
 from page_sign_in import SignInPage
+from page_sign_up import SignUpPage
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -17,7 +18,8 @@ class MainWindow(QMainWindow):
         # Page Loading
 
         self.pages = {
-            "SignIn": SignInPage()
+            "SignIn": SignInPage(),
+            "SignUp": SignUpPage(),
         }
 
         for page in self.pages.values():
@@ -33,6 +35,8 @@ class MainWindow(QMainWindow):
 
         self.pages["SignIn"].navigate_to_home.connect(lambda: self.switch_to_page("Home"))
         self.pages["SignIn"].navigate_to_sign_up.connect(lambda: self.switch_to_page("SignUp"))
+
+        self.pages["SignUp"].navigate_to_sign_in.connect(lambda: self.switch_to_page("SignIn"))
 
         # End Of Setup
 
