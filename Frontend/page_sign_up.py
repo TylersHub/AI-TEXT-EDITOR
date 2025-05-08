@@ -82,6 +82,13 @@ class SignUpPage(Page):
 
         self.central_layout.addStretch()
 
+    def __flush(self):
+        for input_field in self.findChildren(InputField):
+            input_field.clear()
+
+        for input_warning_label in self.findChildren(InputWarningLabel):
+            input_warning_label.toggle_text(False)
+
     def on_sign_up_click(self):
         fname_input_text = self.fname_input.text()
         lname_input_text = self.lname_input.text()
@@ -168,7 +175,9 @@ class SignUpPage(Page):
         
         # On Success
 
+        self.__flush()
         self.navigate_to_sign_in.emit()
 
     def on_sign_in_click(self):
+        self.__flush()
         self.navigate_to_sign_in.emit()
