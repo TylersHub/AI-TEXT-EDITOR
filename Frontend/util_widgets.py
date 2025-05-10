@@ -5,8 +5,8 @@ from PyQt6.QtCore import Qt
 # Color Palette
 primary_color = QColor("#F8F8FF")
 secondary_color = QColor("#7D55C7")
-accent_color = QColor("#8e78a3")
-dark_text_color = QColor("#252525")
+accent_color = QColor("#F3D03E")
+dark_text_color = QColor("#2C2C2C")
 light_text_color = QColor("#F8F8FF")
 
 class Page(QWidget):
@@ -95,7 +95,7 @@ class ActionLabel(QPushButton):
 
         self.setStyleSheet(
             f"{type(self).__name__} {{"
-            f"color: {accent_color.name()};"
+            f"color: {secondary_color.name()};"
             "background-color: transparent;"
             "font-size: 12px;"
             "font-weight: 600;"
@@ -114,7 +114,7 @@ class PrimaryButton(QPushButton):
         self.setStyleSheet(
             f"{type(self).__name__} {{"
             f"color: {primary_color.name()};"
-            f"background-color: {accent_color.name()};"
+            f"background-color: {secondary_color.name()};"
             "border-radius: 8px;"
             "height: 32px;"
             "font-size: 16px;"
