@@ -4,7 +4,7 @@ from util_widgets import Page, HeaderText, InputLabel, InputField, InputWarningL
 from util_functions import validate_email, validate_password
 
 class SignInPage(Page):
-    session_credentials_received = pyqtSignal(int, str)
+    session_credentials_received = pyqtSignal(int, str, str, int)
     navigate_to_home = pyqtSignal()
     navigate_to_sign_up = pyqtSignal()
 
@@ -119,7 +119,7 @@ class SignInPage(Page):
 
         # API ENDPOINT #
         # Ask Backend To Verify Email And Password
-        # Expect Assessment Bool, (Session Token, And Account Type) From Backend
+        # Expect Assessment Bool, (Session Token, Account Type, Account Name, Token Count) From Backend
         # API ENDPOINT #
 
         # Incorrect Input Termination
@@ -130,7 +130,7 @@ class SignInPage(Page):
         # On Success
 
         self.__flush()
-        self.session_credentials_received.emit(12345, "PAID") # NOTE: Should pass Session Token / Acc Type in future
+        self.session_credentials_received.emit(12345, "PAID", "User7", 777) # PLACEHOLDER
         self.navigate_to_home.emit()
         
     def on_sign_up_click(self):
