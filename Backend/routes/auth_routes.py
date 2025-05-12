@@ -14,6 +14,12 @@ def signup():
     if missing:
         return jsonify({'success': False, 'error': f'Missing fields: {', '.join(missing)}'}), 400
 
+    # Check if email already exists
+    existing = supabase.table('users').select('id').eq('email', data['email']).execute().data
+    if existing:
+        return jsonify({'success': False, 'error': 'Email already registered'}), 400
+
+    # Insert user
     res = supabase.table('users').insert({
         'email': data['email'],
         'password': data['password'],
