@@ -1,11 +1,11 @@
 import sys
 import os
-
+from PyQt6.QtGui import QTextCursor
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QTextEdit, QPushButton
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from llm.llm_api import generate_with_ollama
+from llm.llm_worker import LLMStreamWorker
 
 class LLMTestPage(QWidget):
     def __init__(self):
@@ -32,8 +32,18 @@ class LLMTestPage(QWidget):
             self.response_output.setText("⚠️ Please enter a prompt.")
             return
 
-        try:
-            response = generate_with_ollama(prompt)
-            self.response_output.setText(response)
-        except Exception as e:
-            self.response_output.setText(f"❌ Error: {e}")
+        self.response_output.clear()
+        self.send_button.setEnabled(False)
+
+        self.worker = LLMStreamWorker(prompt=prompt)
+        self.worker.token_received.connect(self.append_token)
+        self.worker.finished.connect(self.stream_finished)
+        self.worker.start()
+
+    def append_token(self, token: str):
+        self.response_output.moveCursor(QTextCursor.MoveOperation.End)
+        self.response_output.insertPlainText(token)
+        self.response_output.ensureCursorVisible()
+
+    def stream_finished(self):
+        self.send_button.setEnabled(True)
