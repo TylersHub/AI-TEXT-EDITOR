@@ -116,6 +116,8 @@ class PrimaryButton(QPushButton):
             f"background-color: {secondary_color.name()};"
             "border-radius: 8px;"
             "height: 32px;"
+            "min-width: 128px;"
+            "border-radius: 16px;"
             "font-size: 16px;"
             "font-weight: 600;"
             "}"
@@ -133,6 +135,8 @@ class SecondaryButton(QPushButton):
             f"background-color: {primary_color.name()};"
             "border-radius: 8px;"
             "height: 32px;"
+            "min-width: 128px;"
+            "border-radius: 16px;"
             "font-size: 16px;"
             "font-weight: 600;"
             "}"
@@ -141,7 +145,7 @@ class SecondaryButton(QPushButton):
         self.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
 
 class HomeSideBar(QWidget):
-    def __init__(self, user_mode: str):
+    def __init__(self, account_type: str, user_name: str, token_count: int):
         super().__init__()
 
         self.setStyleSheet(
@@ -152,7 +156,9 @@ class HomeSideBar(QWidget):
 
         self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
 
-        self.user_mode = user_mode
+        self.account_type = account_type
+        self.user_name = user_name
+        self.token_count = token_count
         self.__init_body()
 
     def __init_body(self):
@@ -169,8 +175,9 @@ class HomeSideBar(QWidget):
         self.profile_avatar.setFixedSize(40, 40)
         self.profile_layout.addWidget(self.profile_avatar)
 
-        self.profile_name = QLabel("User101")
+        self.profile_name = QLabel(self.user_name)
         self.profile_name.setStyleSheet(f"color: {primary_color.name()}; font-size: 32px;")
+        self.profile_name.setMinimumWidth(128)
         self.profile_layout.addWidget(self.profile_name)
 
         self.bar_one = QWidget()
@@ -181,9 +188,11 @@ class HomeSideBar(QWidget):
         self.token_layout = QHBoxLayout()
         self.central_layout.addLayout(self.token_layout)
 
-        self.token_count = QLabel("Tokens: 101T")
+        self.token_count = QLabel(f"Tokens: {self.token_count}")
         self.token_count.setStyleSheet(f"color: {primary_color.name()}; font-size: 24px;")
         self.token_layout.addWidget(self.token_count)
+
+        self.token_layout.addStretch()
 
         self.buy_token_button = QPushButton("➕")
         self.buy_token_button.setStyleSheet(f"background-color: {primary_color.name()}; color: {dark_text_color.name()}; font-size: 16px; border-radius: 16px;")
@@ -202,7 +211,7 @@ class HomeSideBar(QWidget):
         self.history_button = SecondaryButton("History")
         self.central_layout.addWidget(self.history_button)
 
-        if (self.user_mode == "ADMIN"):
+        if self.account_type == "ADMIN":
             self.complaints_button = SecondaryButton("Complaints")
             self.central_layout.addWidget(self.complaints_button)
 
@@ -211,5 +220,55 @@ class HomeSideBar(QWidget):
 
         self.central_layout.addStretch()
 
+        self.bar_three = QWidget()
+        self.bar_three.setStyleSheet(f"background-color: {primary_color.name()};")
+        self.bar_three.setFixedHeight(2)
+        self.central_layout.addWidget(self.bar_three)
+
         self.sign_out_button = SecondaryButton("Sign Out")
         self.central_layout.addWidget(self.sign_out_button)
+
+class FilePreview(QWidget):
+    def __init__(self, file_name: str, file_head: str, file_id: int):
+        super().__init__()
+
+        self.setStyleSheet(
+            f"{type(self).__name__} {{"
+            f"background-color: {primary_color.darker(105).name()};"
+            "border: 0px;"
+            "}"
+        )
+
+        self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
+        self.__init_body(file_name, file_head, file_id)
+
+    def __init_body(self, file_name: str, file_head: str, file_id: int):
+        self.central_layout = QHBoxLayout(self)
+        self.central_layout.setContentsMargins(0, 0, 0, 0)
+        self.central_layout.setSpacing(16)
+
+        self.file_icon = QLabel("🗎")
+        self.file_icon.setStyleSheet(f"background-color: {dark_text_color.name()}; color: {primary_color.name()}; font-size: 56px; border-radius: 16px;")
+        self.file_icon.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.file_icon.setFixedSize(100, 100)
+        self.central_layout.addWidget(self.file_icon)
+
+        self.file_info_layout = QVBoxLayout()
+        self.file_info_layout.setContentsMargins(0, 0, 0, 0)
+        self.file_info_layout.setSpacing(0)
+        self.central_layout.addLayout(self.file_info_layout)
+
+        self.file_name = QLabel(file_name)
+        self.file_name.setStyleSheet(f"color: {dark_text_color.name()}; font-size: 24px; font-weight: 600;")
+        self.file_info_layout.addWidget(self.file_name)
+
+        self.file_head = QLabel(file_head)
+        self.file_head.setStyleSheet(f"color: {dark_text_color.name()}; font-size: 16px;")
+        self.file_info_layout.addWidget(self.file_head)
+
+        self.file_info_layout.addStretch()
+
+        self.edit_file_label = ActionLabel("Edit File")
+        self.file_info_layout.addWidget(self.edit_file_label)
+
+        self.central_layout.addStretch()
