@@ -1,5 +1,6 @@
 from flask import Blueprint, request, jsonify
 from config import supabase
+from utils import log_action, require_role
 from utils import get_user_tokens, update_user_tokens, log_action, check_blacklisted_words
 
 import time
@@ -46,3 +47,42 @@ def submit_text():
     }).execute()
 
     return jsonify({'document': doc.data[0], 'tokens_used': total_cost})
+
+@submission_bp.route('/documents/previews/<user_id>', methods=['GET'])
+@require_role(['paid', 'super'])
+def file_previews(user_id):
+    docs = supabase.table('documents') \
+        .select('id, title, content') \
+        .eq('owner_id', user_id).execute().data
+
+    previews = []
+    for doc in docs:
+        preview_text = ' '.join(doc['content'].split()[:10])
+        previews.append({
+            'title': doc['title'],
+            'preview': preview_text,
+            'id': doc['id']
+        })
+
+    return jsonify(previews)
+
+# users can open a full document (for editing or review)
+
+@submission_bp.route('/documents/<doc_id>', methods=['GET'])
+@require_role(['paid', 'super'])
+def open_document(doc_id):
+    res = supabase.table('documents') \
+        .select('id, title, content, owner_id, updated_at') \
+        .eq('id', doc_id).execute()
+
+    if not res.data:
+        return jsonify({'error': 'Document not found'}), 404
+
+    doc = res.data[0]
+    return jsonify({
+        'id': doc['id'],
+        'title': doc['title'],
+        'content': doc['content'],
+        'owner_id': doc['owner_id'],
+        'updated_at': doc['updated_at']
+    })

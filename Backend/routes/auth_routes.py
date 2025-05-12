@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
 from config import supabase
 from utils import log_action, require_role
+from routes.session_routes import create_session
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -8,27 +9,59 @@ auth_bp = Blueprint('auth', __name__)
 @auth_bp.route('/auth/signup', methods=['POST'])
 def signup():
     data = request.get_json()
+    required = ['email', 'password', 'first_name', 'last_name']
+    missing = [field for field in required if field not in data]
+    if missing:
+        return jsonify({'success': False, 'error': f'Missing fields: {', '.join(missing)}'}), 400
+
     res = supabase.table('users').insert({
         'email': data['email'],
         'password': data['password'],
+        'first_name': data['first_name'],
+        'last_name': data['last_name'],
         'user_type': data.get('user_type', 'free')
     }).execute()
-    return jsonify(res.data[0]), 201
+    
+    return jsonify({'success': True, 'user': res.data[0]}), 201
+
 
 # Log in a user and check for lockout
 @auth_bp.route('/auth/login', methods=['POST'])
 def login():
     data = request.get_json()
-    res = supabase.table('users').select('*').eq('email', data['email']).eq('password', data['password']).execute()
+    res = supabase.table('users').select('*') \
+        .eq('email', data['email']).eq('password', data['password']).execute()
+
     if not res.data:
-        return jsonify({'error': 'Invalid credentials'}), 401
+        return jsonify({'success': False, 'error': 'Invalid credentials'}), 401
+
     user = res.data[0]
+
+    # Check for lockout (free users)
     if user['user_type'] == 'free':
-        lock = supabase.table('lockouts').select('*').eq('user_id', user['id']).gt('expires_at', 'now()').execute()
+        lock = supabase.table('lockouts').select('*') \
+            .eq('user_id', user['id']).gt('expires_at', 'now()').execute()
         if lock.data:
-            return jsonify({'error': 'Account temporarily locked', 'expires_at': lock.data[0]['expires_at']}), 403
+            return jsonify({
+                'success': False,
+                'error': 'Account temporarily locked',
+                'expires_at': lock.data[0]['expires_at']
+            }), 403
+
+    # Create session token
+    token = create_session(user['id'])
+
+    # Log login event
     log_action(user['id'], 'login')
-    return jsonify(user)
+
+    # Return success response with token and role
+    return jsonify({
+        'success': True,
+        'session_token': token,
+        'account_type': user['user_type'],
+        'user_id': user['id']
+    })
+
 
 # Submit a request to upgrade to paid
 @auth_bp.route('/auth/upgrade', methods=['POST'])
@@ -50,3 +83,30 @@ def approve_upgrade():
     supabase.table('users').update({'user_type': 'paid', 'tokens': 50}).eq('id', req['user_id']).execute()
     supabase.table('upgrade_requests').update({'status': 'approved'}).eq('id', data['request_id']).execute()
     return jsonify({'message': 'User upgraded to paid status'})
+
+
+@auth_bp.route('/auth/upgrade/requests', methods=['GET'])
+@require_role(['super'])
+def get_upgrade_requests():
+    res = supabase.table('upgrade_requests').select(
+        'id, user_id, status, notes, created_at'
+    ).eq('status', 'pending').execute()
+
+    return jsonify(res.data)
+
+# super users reject upgrade requests.
+@auth_bp.route('/auth/upgrade/deny', methods=['POST'])
+@require_role(['super'])
+def deny_upgrade():
+    data = request.get_json()
+    request_id = data.get('request_id')
+
+    if not request_id:
+        return jsonify({'error': 'Missing request_id'}), 400
+
+    # Mark the upgrade request as denied
+    supabase.table('upgrade_requests').update({
+        'status': 'denied'
+    }).eq('id', request_id).execute()
+
+    return jsonify({'message': 'Upgrade request denied'})
