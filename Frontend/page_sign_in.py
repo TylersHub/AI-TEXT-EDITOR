@@ -3,8 +3,10 @@ from PyQt6.QtCore import pyqtSignal
 from util_widgets import Page, HeaderText, InputLabel, InputField, InputWarningLabel, ActionLabel, PrimaryButton
 from util_functions import validate_email, validate_password
 
+import requests
+
 class SignInPage(Page):
-    session_credentials_received = pyqtSignal(int, str, str, int)
+    session_credentials_received = pyqtSignal(int, str)
     navigate_to_home = pyqtSignal()
     navigate_to_sign_up = pyqtSignal()
 
@@ -70,15 +72,14 @@ class SignInPage(Page):
 
         for input_warning_label in self.findChildren(InputWarningLabel):
             input_warning_label.toggle_text(False)
-    
-    def on_forgot_password_click(self):
-        pass
 
     def on_sign_in_click(self):
         email_input_text = self.email_input.text()
         password_input_text = self.password_input.text()
         invalid_input = False
         incorrect_input = False
+        session_token = None
+        account_type = None
 
         # Email Input Validation
 
@@ -110,27 +111,53 @@ class SignInPage(Page):
         else:
             self.password_warning_label.toggle_text(False)
 
-        # Invalid Input Termination
-
         if invalid_input:
             return
         
         # Input Authentication
 
-        # API ENDPOINT #
-        # Ask Backend To Verify Email And Password
-        # Expect Assessment Bool, (Session Token, Account Type, Account Name, Token Count) From Backend
-        # API ENDPOINT #
+        try:
+            login_data = {"email": email_input_text, "password": password_input_text}
+            headers = {"Content-Type": "application/json"}
 
-        # Incorrect Input Termination
+            response = requests.post("http://127.0.0.1:5000/auth/login", json=login_data, headers=headers)
+            response.raise_for_status()
+
+            data = response.json()
+
+            if data["success"] == False:
+                if data["error"] == "Invalid credentials":
+                    self.email_warning_label.setText("Incorrect email or password")
+                    self.password_warning_label.setText("Incorrect email or password")
+                elif data["error"] == "Account temporarily locked":
+                    self.email_warning_label.setText("Account temporarily locked")
+                    self.password_warning_label.setText("Account temporarily locked")
+                else:
+                    raise requests.exceptions.RequestException(f"Invalid failure message '{data["error"]}'")
+                    
+                self.email_warning_label.toggle_text(True)
+                self.password_warning_label.toggle_text(True)
+                incorrect_input = True
+            elif data["success"] == True:
+                session_token = data["session_token"]
+                account_type = data["account_type"].upper()
+            else:
+                raise requests.exceptions.RequestException(f"Invalid success value '{data["success"]}")
+        except requests.exceptions.RequestException as e:
+            print(f"Error fetching data: {e}")
+
+            self.email_warning_label.setText("Server error encountered. Try again later.")
+            self.email_warning_label.toggle_text(True)
+            self.password_warning_label.setText("Server error encountered. Try again later.")
+            self.password_warning_label.toggle_text(True)
+
+            incorrect_input = True
 
         if incorrect_input:
             return
-        
-        # On Success
 
         self.__flush()
-        self.session_credentials_received.emit(12345, "PAID", "User7", 777) # PLACEHOLDER
+        self.session_credentials_received.emit(session_token, account_type)
         self.navigate_to_home.emit()
         
     def on_sign_up_click(self):
