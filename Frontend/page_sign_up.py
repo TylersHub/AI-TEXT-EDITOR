@@ -3,6 +3,8 @@ from PyQt6.QtCore import pyqtSignal
 from util_widgets import Page, HeaderText, InputLabel, InputField, InputWarningLabel, ActionLabel, PrimaryButton
 from util_functions import validate_name, validate_email, validate_password
 
+import requests
+
 class SignUpPage(Page):
     navigate_to_sign_in = pyqtSignal()
 
@@ -159,21 +161,48 @@ class SignUpPage(Page):
         else:
             self.password_warning_label.toggle_text(False)
 
-        # Invalid Input Termination
-
         if invalid_input:
             return
         
         # Input Authentication
 
-        ##### ... API ENDPOINT ... #####
+        try:
+            sign_up_data = {"first_name": fname_input_text, "last_name": lname_input_text, "email": email_input_text.lower(), "password": password_input_text}
+            headers = {"Content-Type": "application/json"}
 
-        # Incorrect Input Termination
+            response = requests.post("http://127.0.0.1:5000/auth/signup", json=sign_up_data, headers=headers)
+
+            if response.status_code not in (200, 401):
+                response.raise_for_status()
+
+            data = response.json()
+
+            if data["success"] == False:
+                if data["error"] == "Account already exists":
+                    self.email_warning_label.setText("This email is already registered")
+                else:
+                    raise requests.exceptions.RequestException(f"Invalid failure message '{data['error']}'")
+                    
+                self.email_warning_label.toggle_text(True)
+                incorrect_input = True
+            elif data["success"] != True:
+                raise requests.exceptions.RequestException(f"Invalid success value '{data['success']}'")
+        except requests.exceptions.RequestException as e:
+            print(f"Error fetching data: {e}")
+
+            self.fname_warning_label.setText("Server error encountered. Try again later.")
+            self.fname_warning_label.toggle_text(True)
+            self.lname_warning_label.setText("Server error encountered. Try again later.")
+            self.lname_warning_label.toggle_text(True)
+            self.email_warning_label.setText("Server error encountered. Try again later.")
+            self.email_warning_label.toggle_text(True)
+            self.password_warning_label.setText("Server error encountered. Try again later.")
+            self.password_warning_label.toggle_text(True)
+
+            incorrect_input = True
 
         if incorrect_input:
             return
-        
-        # On Success
 
         self.__flush()
         self.navigate_to_sign_in.emit()

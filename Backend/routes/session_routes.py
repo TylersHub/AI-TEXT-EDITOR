@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from config import supabase
+from Backend.config import supabase
 import uuid
 from datetime import datetime, timedelta
 

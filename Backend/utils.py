@@ -1,5 +1,5 @@
 from flask import request, jsonify
-from config import supabase
+from Backend.config import supabase
 import re
 
 # Get the user role from Supabase

@@ -1,7 +1,7 @@
 # moderation_routes.py
 from flask import Blueprint, request, jsonify
-from config import supabase
-from utils import update_user_tokens, require_role
+from Backend.config import supabase
+from Backend.utils import update_user_tokens, require_role
 
 moderation_bp = Blueprint('moderation', __name__)
 

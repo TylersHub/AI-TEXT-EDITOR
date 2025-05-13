@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
-from config import supabase
-from utils import get_user_tokens, update_user_tokens, require_role, log_action
+from Backend.config import supabase
+from Backend.utils import get_user_tokens, update_user_tokens, require_role, log_action
 
 correction_bp = Blueprint('correction', __name__)
 
