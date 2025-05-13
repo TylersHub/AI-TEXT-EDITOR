@@ -122,7 +122,7 @@ class SignInPage(Page):
 
             response = requests.post("http://127.0.0.1:5000/auth/login", json=login_data, headers=headers)
 
-            if response.status_code not in (200, 401):
+            if response.status_code not in (200, 401, 403):
                 response.raise_for_status()
 
             data = response.json()
@@ -134,6 +134,9 @@ class SignInPage(Page):
                 elif data["error"] == "Account temporarily locked":
                     self.email_warning_label.setText("Account temporarily locked")
                     self.password_warning_label.setText("Account temporarily locked")
+                elif data["error"] == "Account pending approval":
+                    self.email_warning_label.setText("Account pending approval")
+                    self.password_warning_label.setText("Account pending approval")
                 else:
                     raise requests.exceptions.RequestException(f"Invalid failure message '{data["error"]}'")
                     
