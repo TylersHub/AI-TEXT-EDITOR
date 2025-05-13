@@ -211,7 +211,7 @@ class HomeSideBar(QWidget):
         self.history_button = SecondaryButton("History")
         self.central_layout.addWidget(self.history_button)
 
-        if self.account_type == "ADMIN":
+        if self.account_type == "SUPER":
             self.complaints_button = SecondaryButton("Complaints")
             self.central_layout.addWidget(self.complaints_button)
 
