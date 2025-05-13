@@ -1,12 +1,10 @@
 from PyQt6.QtWidgets import QVBoxLayout
 from PyQt6.QtCore import pyqtSignal
 from util_widgets import Page, HeaderText, InputLabel, InputField, InputWarningLabel, ActionLabel, PrimaryButton
-from util_functions import validate_email, validate_password
+from util_functions import validate_name, validate_email, validate_password
 
-class SignInPage(Page):
-    session_credentials_received = pyqtSignal(int, str)
-    navigate_to_home = pyqtSignal()
-    navigate_to_sign_up = pyqtSignal()
+class SignUpPage(Page):
+    navigate_to_sign_in = pyqtSignal()
 
     def __init__(self):
         super().__init__()
@@ -18,6 +16,28 @@ class SignInPage(Page):
 
         self.sign_in_header = HeaderText("Enter HungryText")
         self.central_layout.addWidget(self.sign_in_header)
+
+        # First Name Section
+
+        self.fname_label = InputLabel("First Name")
+        self.central_layout.addWidget(self.fname_label)
+
+        self.fname_input = InputField()
+        self.central_layout.addWidget(self.fname_input)
+
+        self.fname_warning_label = InputWarningLabel("Invalid name")
+        self.central_layout.addWidget(self.fname_warning_label)
+
+        # Last Name Section
+
+        self.lname_label = InputLabel("Last Name")
+        self.central_layout.addWidget(self.lname_label)
+
+        self.lname_input = InputField()
+        self.central_layout.addWidget(self.lname_input)
+
+        self.lname_warning_label = InputWarningLabel("Invalid name")
+        self.central_layout.addWidget(self.lname_warning_label)
 
         # Email Section
 
@@ -41,24 +61,22 @@ class SignInPage(Page):
         self.password_warning_label = InputWarningLabel("Invalid password")
         self.central_layout.addWidget(self.password_warning_label)
 
-        # self.forgot_password_label = ActionLabel("Forgot password?")
-        # self.forgot_password_label.clicked.connect(self.on_forgot_password_click)
-        # self.central_layout.addWidget(self.forgot_password_label)
-
         # Call-To-Action
 
-        self.sign_in_button = PrimaryButton("Sign In")
-        self.sign_in_button.clicked.connect(self.on_sign_in_click)
-        self.central_layout.addWidget(self.sign_in_button)
+        self.sign_up_button = PrimaryButton("Sign Up")
+        self.sign_up_button.clicked.connect(self.on_sign_up_click)
+        self.central_layout.addWidget(self.sign_up_button)
 
-        self.sign_up_label = ActionLabel("Don't have an account?")
-        self.sign_up_label.clicked.connect(self.on_sign_up_click)
-        self.central_layout.addWidget(self.sign_up_label)
+        self.sign_in_label = ActionLabel("Already have an account?")
+        self.sign_in_label.clicked.connect(self.on_sign_in_click)
+        self.central_layout.addWidget(self.sign_in_label)
 
         # Form Submission Shortcuts
 
-        self.email_input.returnPressed.connect(self.sign_in_button.click)
-        self.password_input.returnPressed.connect(self.sign_in_button.click)
+        self.fname_input.returnPressed.connect(self.sign_up_button.click)
+        self.lname_input.returnPressed.connect(self.sign_up_button.click)
+        self.email_input.returnPressed.connect(self.sign_up_button.click)
+        self.password_input.returnPressed.connect(self.sign_up_button.click)
 
         # End Of Layout
 
@@ -70,15 +88,46 @@ class SignInPage(Page):
 
         for input_warning_label in self.findChildren(InputWarningLabel):
             input_warning_label.toggle_text(False)
-    
-    def on_forgot_password_click(self):
-        pass
 
-    def on_sign_in_click(self):
+    def on_sign_up_click(self):
+        fname_input_text = self.fname_input.text()
+        lname_input_text = self.lname_input.text()
         email_input_text = self.email_input.text()
         password_input_text = self.password_input.text()
         invalid_input = False
         incorrect_input = False
+
+        # First Name Input Validation
+
+        is_fname_input_valid, invalid_fname_input_error = validate_name(fname_input_text)
+
+        if is_fname_input_valid == False:
+            if invalid_fname_input_error == "EMPTY":
+                self.fname_warning_label.setText("Please enter a name")
+            elif invalid_fname_input_error == "INVALID":
+                self.fname_warning_label.setText("Please enter a valid name")
+
+            self.fname_warning_label.toggle_text(True)
+            invalid_input = True
+        else:
+            self.fname_warning_label.toggle_text(False)
+
+        # Last Name Input Validation
+
+        is_lname_input_valid, invalid_lname_input_error = validate_name(lname_input_text)
+
+        is_lname_input_valid, invalid_lname_input_error = validate_name(lname_input_text)
+
+        if is_lname_input_valid == False:
+            if invalid_lname_input_error == "EMPTY":
+                self.lname_warning_label.setText("Please enter a name")
+            elif invalid_lname_input_error == "INVALID":
+                self.lname_warning_label.setText("Please enter a valid name")
+
+            self.lname_warning_label.toggle_text(True)
+            invalid_input = True
+        else:
+            self.lname_warning_label.toggle_text(False)
 
         # Email Input Validation
 
@@ -117,10 +166,7 @@ class SignInPage(Page):
         
         # Input Authentication
 
-        # API ENDPOINT #
-        # Ask Backend To Verify Email And Password
-        # Expect Assessment Bool, (Session Token, And Account Type) From Backend
-        # API ENDPOINT #
+        ##### ... API ENDPOINT ... #####
 
         # Incorrect Input Termination
 
@@ -130,9 +176,8 @@ class SignInPage(Page):
         # On Success
 
         self.__flush()
-        self.session_credentials_received.emit(12345, "PAID") # NOTE: Should pass Session Token / Acc Type in future
-        self.navigate_to_home.emit()
-        
-    def on_sign_up_click(self):
+        self.navigate_to_sign_in.emit()
+
+    def on_sign_in_click(self):
         self.__flush()
-        self.navigate_to_sign_up.emit()
+        self.navigate_to_sign_in.emit()
