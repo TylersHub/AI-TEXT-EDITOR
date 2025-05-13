@@ -117,7 +117,7 @@ class SignInPage(Page):
         # Input Authentication
 
         try:
-            login_data = {"email": email_input_text, "password": password_input_text}
+            login_data = {"email": email_input_text.lower(), "password": password_input_text}
             headers = {"Content-Type": "application/json"}
 
             response = requests.post("http://127.0.0.1:5000/auth/login", json=login_data, headers=headers)
