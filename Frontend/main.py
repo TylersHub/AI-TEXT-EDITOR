@@ -1,10 +1,20 @@
+# May move this file into project root directory...
+
 import sys
 import os
+
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+if PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT)
+
+import threading
 from PyQt6.QtWidgets import QApplication, QMainWindow, QStackedWidget
 from PyQt6.QtCore import Qt
 
 # Adds the parent directory to sys.path so 'llm' becomes importable
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from Backend.app import app as flask_app  # adjust path if needed
 
 from llm.llm_local import ensure_ollama_ready
 
@@ -15,6 +25,11 @@ from page_llm_test import LLMTestPage
 
 MODEL = "llama3.2"
 
+# Start Backend
+def run_flask():
+    flask_app.run(port=5000, debug=False, use_reloader=False)
+
+# Start Frontend
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -57,9 +72,14 @@ class MainWindow(QMainWindow):
 
 def main():
     try:
+        # Ensuring Ollama Model is ready
         print(f"🔄 Initializing model '{MODEL}'...")
         ensure_ollama_ready(MODEL)
         print(f"✅ Model '{MODEL}' is ready.")
+
+        # Start Flask server in the background
+        flask_thread = threading.Thread(target=run_flask, daemon=True)
+        flask_thread.start()
 
         app = QApplication(sys.argv)
         window = MainWindow()

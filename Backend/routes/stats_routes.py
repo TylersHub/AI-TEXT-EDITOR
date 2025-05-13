@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify
-from config import supabase
-from utils import require_role
+from Backend.config import supabase
+from Backend.utils import require_role
 
 stats_bp = Blueprint('stats', __name__)
 
@@ -26,3 +26,14 @@ def get_user_stats(user_id):
     }
 
     return jsonify(stats)
+
+@stats_bp.route('/user/sidebar/<user_id>', methods=['GET'])
+@require_role(['free', 'paid', 'super'])
+def sidebar_info(user_id):
+    user = supabase.table('users').select('first_name', 'tokens') \
+        .eq('id', user_id).execute().data[0]
+
+    return jsonify({
+        'first_name': user['first_name'],
+        'tokens': user['tokens']
+    })

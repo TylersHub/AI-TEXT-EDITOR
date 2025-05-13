@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
-from config import supabase
-from utils import get_user_tokens, update_user_tokens, require_role, log_action
+from Backend.config import supabase
+from Backend.utils import get_user_tokens, update_user_tokens, require_role, log_action
 
 correction_bp = Blueprint('correction', __name__)
 
@@ -107,3 +107,13 @@ def review_llm_rejection():
         return jsonify({'message': 'Penalty applied', 'penalty': 5})
 
     return jsonify({'message': 'Rejection accepted'})
+
+# view all LLM rejection reports | This will be used for moderation/review purposes by super users
+@correction_bp.route('/corrections/llm/rejections', methods=['GET'])
+@require_role(['super'])
+def get_llm_rejections():
+    res = supabase.table('llm_rejections').select(
+        'id, user_id, document_id, reason, status, created_at'
+    ).eq('status', 'pending').execute()
+
+    return jsonify(res.data)
