@@ -1,6 +1,8 @@
 from PyQt6.QtWidgets import QApplication, QMainWindow, QStackedWidget
 from PyQt6.QtCore import Qt
+
 import sys
+import requests
 
 from page_sign_in import SignInPage
 from page_sign_up import SignUpPage
@@ -67,7 +69,7 @@ class MainWindow(QMainWindow):
         self.account_type = None
 
     def authenticate_session_credentials(self) -> bool:
-        if not self.session_token or not self.account_type:
+        if not self.session_token or not self.account_type or (self.account_type != "FREE" and self.account_type != "PAID" and self.account_type != "SUPER"):
             self.session_token = None
             self.account_type = None
 
@@ -86,40 +88,46 @@ class MainWindow(QMainWindow):
         self.pages[page].deleteLater()
         self.pages[page] = None
     
-    def load_page(self, page: str):
+    def load_page(self, page: str, pars: dict = None):
         # Clear Pages And Redirect To Sign In If Invalid Credentials
         if self.authenticate_session_credentials() == False:
+            print(f"Error (load_page): Page '{page}' given, but invalid credentials provided!")
+
             for pg in self.pages:
                 if pg != "SignIn" and pg != "SignUp" and self.pages[pg] != None:
                     self.unload_page(pg)
 
             self.central_widget.setCurrentWidget(self.pages["SignIn"])
-        else:
-            # Unload Page If It Already Exists
-            if self.pages[page] != None:
-                self.unload_page(page)
+            return
 
-            if page == "Home":
-                self.pages[page] = HomePage(self.account_type)
-                self.pages[page].sign_out_requested.connect(self.clear_session_credentials)
-                self.pages[page].navigate_to_sign_in.connect(lambda: self.switch_to_page("SignIn"))
+        # Unload Page If It Already Exists
+        if self.pages[page] != None:
+            self.unload_page(page)
 
-            self.central_widget.addWidget(self.pages[page])
-            self.central_widget.setCurrentWidget(self.pages[page])
+        # Load New Page
+        if page == "Home":
+            self.pages[page] = HomePage(self.session_token, self.account_type)
+            self.pages[page].sign_out_requested.connect(self.clear_session_credentials)
+            self.pages[page].navigate_to_sign_in.connect(lambda: self.switch_to_page("SignIn"))
+            self.pages[page].navigate_to_file_edit.connect(lambda file_id: self.switch_to_page("FileCreate", {"file_id": file_id}))
+        elif page == "FileEdit":
+            pass
+        elif page == "FileCreate":
+            pass
 
-    def switch_to_page(self, page: str):
-        if page in self.pages:
-            if page == "SignIn" or page == "SignUp":
-                self.central_widget.setCurrentWidget(self.pages[page])
-            else:
-                if self.account_type == None:
-                    print(f"Error (switch_to_page): Page '{page}' given, but no user type provided!")
-                elif self.account_type != "FREE" and self.account_type != "PAID" and self.account_type != "ADMIN":
-                    print(f"Error (switch_to_page): Page '{page}' given, but invalid user type '{self.account_type}' provided!")
-                else:
-                    self.load_page(page)
-        else:
+        self.central_widget.addWidget(self.pages[page])
+        self.central_widget.setCurrentWidget(self.pages[page])
+
+    def switch_to_page(self, page: str, pars: dict = None):
+        if page not in self.pages:
             print(f"Error (switch_to_page): Page '{page}' not found in Pages!")
+            return
+        
+        if page == "SignIn" or page == "SignUp":
+            self.central_widget.setCurrentWidget(self.pages[page])
+            return
+
+        self.load_page(page, pars)
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
