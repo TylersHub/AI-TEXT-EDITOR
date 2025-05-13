@@ -83,6 +83,24 @@ class MainWindow(QMainWindow):
         return True
         # TEMP
 
+    def connect_side_bar(self, page: str):
+        # Session Slots
+        self.pages[page].side_bar.sign_out_requested.connect(self.clear_session_credentials)
+        self.pages[page].side_bar.navigate_to_sign_in.connect(lambda: self.switch_to_page("SignIn"))
+
+        # Side Bar Slots
+        self.pages[page].side_bar.navigate_to_token_purchase.connect(lambda: self.switch_to_page("BuyTokens"))
+        self.pages[page].side_bar.navigate_to_settings.connect(lambda: self.switch_to_page("Settings"))
+        self.pages[page].side_bar.navigate_to_history.connect(lambda: self.switch_to_page("History"))
+        self.pages[page].side_bar.navigate_to_invites.connect(lambda: self.switch_to_page("Invites"))
+        self.pages[page].side_bar.navigate_to_blacklist.connect(lambda: self.switch_to_page("Blacklist"))
+
+        # Side Bar Admin Slots
+        self.pages[page].side_bar.navigate_to_applications.connect(lambda: self.switch_to_page("Applications"))
+        self.pages[page].side_bar.navigate_to_rejections.connect(lambda: self.switch_to_page("Rejections"))
+        self.pages[page].side_bar.navigate_to_complaints.connect(lambda: self.switch_to_page("Complaints"))
+        self.pages[page].side_bar.navigate_to_moderation.connect(lambda: self.switch_to_page("Moderation"))
+    
     def unload_page(self, page: str):
         self.central_widget.removeWidget(self.pages[page])
         self.pages[page].deleteLater()
@@ -107,9 +125,13 @@ class MainWindow(QMainWindow):
         # Load New Page
         if page == "Home":
             self.pages[page] = HomePage(self.session_token, self.account_type)
-            self.pages[page].sign_out_requested.connect(self.clear_session_credentials)
-            self.pages[page].navigate_to_sign_in.connect(lambda: self.switch_to_page("SignIn"))
-            self.pages[page].navigate_to_file_edit.connect(lambda file_id: self.switch_to_page("FileCreate", {"file_id": file_id}))
+
+            # Side Bar Slots
+            self.connect_side_bar(page)
+
+            # File Slots
+            self.pages[page].navigate_to_file_edit.connect(lambda file_id: self.switch_to_page("FileEdit", {"file_id": file_id}))
+            self.pages[page].navigate_to_file_create.connect(lambda: self.switch_to_page("FileCreate"))
         elif page == "FileEdit":
             pass
         elif page == "FileCreate":
