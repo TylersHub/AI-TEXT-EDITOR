@@ -1,6 +1,6 @@
 from PyQt6.QtWidgets import QWidget, QLabel, QLineEdit, QPushButton, QSizePolicy, QVBoxLayout, QHBoxLayout
 from PyQt6.QtGui import QColor, QCursor
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, pyqtSignal
 
 # Color Palette
 primary_color = QColor("#F8F8FF")
@@ -144,7 +144,24 @@ class SecondaryButton(QPushButton):
 
         self.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
 
-class HomeSideBar(QWidget):
+class SideBar(QWidget):
+    # Session Signals
+    sign_out_requested = pyqtSignal()
+    navigate_to_sign_in = pyqtSignal()
+
+    # Side Bar Signals
+    navigate_to_token_purchase = pyqtSignal()
+    navigate_to_settings = pyqtSignal()
+    navigate_to_history = pyqtSignal()
+    navigate_to_invites = pyqtSignal()
+    navigate_to_blacklist = pyqtSignal()
+
+    # Side Bar Admin Signals
+    navigate_to_applications = pyqtSignal()
+    navigate_to_rejections = pyqtSignal()
+    navigate_to_complaints = pyqtSignal()
+    navigate_to_moderation = pyqtSignal()
+    
     def __init__(self, account_type: str, user_name: str, token_count: int):
         super().__init__()
 
@@ -156,12 +173,11 @@ class HomeSideBar(QWidget):
 
         self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
 
-        self.account_type = account_type
         self.user_name = user_name
         self.token_count = token_count
-        self.__init_body()
+        self.__init_body(account_type)
 
-    def __init_body(self):
+    def __init_body(self, account_type: str):
         self.central_layout = QVBoxLayout(self)
         self.central_layout.setContentsMargins(32, 32, 32, 32)
         self.central_layout.setSpacing(32)
@@ -198,6 +214,7 @@ class HomeSideBar(QWidget):
         self.buy_token_button.setStyleSheet(f"background-color: {primary_color.name()}; color: {dark_text_color.name()}; font-size: 16px; border-radius: 16px;")
         self.buy_token_button.setMinimumSize(32, 32)
         self.buy_token_button.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
+        self.buy_token_button.clicked.connect(self.navigate_to_token_purchase.emit)
         self.token_layout.addWidget(self.buy_token_button)
 
         self.bar_two = QWidget()
@@ -206,28 +223,36 @@ class HomeSideBar(QWidget):
         self.central_layout.addWidget(self.bar_two)
 
         self.settings_button = SecondaryButton("Settings")
+        self.settings_button.clicked.connect(self.navigate_to_settings.emit)
         self.central_layout.addWidget(self.settings_button)
 
         self.history_button = SecondaryButton("History")
+        self.history_button.clicked.connect(self.navigate_to_history.emit)
         self.central_layout.addWidget(self.history_button)
 
         self.invites_button = SecondaryButton("Invites")
+        self.invites_button.clicked.connect(self.navigate_to_invites.emit)
         self.central_layout.addWidget(self.invites_button)
 
         self.blacklist_button = SecondaryButton("Blacklist")
+        self.blacklist_button.clicked.connect(self.navigate_to_blacklist.emit)
         self.central_layout.addWidget(self.blacklist_button)
 
-        if self.account_type == "SUPER":
+        if account_type == "SUPER":
             self.applications_button = SecondaryButton("Applications")
+            self.applications_button.clicked.connect(self.navigate_to_applications.emit)
             self.central_layout.addWidget(self.applications_button)
 
             self.rejections_button = SecondaryButton("Rejections")
+            self.rejections_button.clicked.connect(self.navigate_to_rejections.emit)
             self.central_layout.addWidget(self.rejections_button)
 
             self.complaints_button = SecondaryButton("Complaints")
+            self.complaints_button.clicked.connect(self.navigate_to_complaints.emit)
             self.central_layout.addWidget(self.complaints_button)
 
             self.moderation_button = SecondaryButton("Moderation")
+            self.moderation_button.clicked.connect(self.navigate_to_moderation.emit)
             self.central_layout.addWidget(self.moderation_button)
 
         self.central_layout.addStretch()
@@ -238,7 +263,12 @@ class HomeSideBar(QWidget):
         self.central_layout.addWidget(self.bar_three)
 
         self.sign_out_button = SecondaryButton("Sign Out")
+        self.sign_out_button.clicked.connect(self.sign_out)
         self.central_layout.addWidget(self.sign_out_button)
+
+    def sign_out(self):
+        self.sign_out_requested.emit()
+        self.navigate_to_sign_in.emit()
 
 class FilePreview(QWidget):
     def __init__(self, file_name: str, file_head: str, file_id: int):
