@@ -6,15 +6,26 @@ from util_widgets import primary_color, dark_text_color
 import requests
 
 class HomePage(Page):
+    # Session Signals
     sign_out_requested = pyqtSignal()
     navigate_to_sign_in = pyqtSignal()
+
+    # File Signals
     navigate_to_file_edit = pyqtSignal(int)
     navigate_to_file_create = pyqtSignal()
+
+    # Menu Bar Signals
     navigate_to_token_purchase = pyqtSignal()
     navigate_to_settings = pyqtSignal()
     navigate_to_history = pyqtSignal()
-    navigate_to_complaints = pyqtSignal()
+    navigate_to_invites = pyqtSignal()
+    navigate_to_blacklist = pyqtSignal()
+
+    # Menu Bar Admin Signals
+    navigate_to_applications = pyqtSignal()
     navigate_to_rejections = pyqtSignal()
+    navigate_to_complaints = pyqtSignal()
+    navigate_to_moderation = pyqtSignal()
 
     def __init__(self, session_token: int, account_type: str):
         super().__init__()
@@ -32,11 +43,15 @@ class HomePage(Page):
         self.side_bar.buy_token_button.clicked.connect(self.on_buy_token_click)
         self.side_bar.settings_button.clicked.connect(self.on_settings_click)
         self.side_bar.history_button.clicked.connect(self.on_history_click)
+        self.side_bar.invites_button.clicked.connect(self.on_invites_click)
+        self.side_bar.blacklist_button.clicked.connect(self.on_blacklist_click)
         self.side_bar.sign_out_button.clicked.connect(self.on_sign_out_click)
 
         if account_type == "SUPER":
-            self.side_bar.complaints_button.clicked.connect(self.on_complaints_click)
+            self.side_bar.applications_button.clicked.connect(self.on_applications_click)
             self.side_bar.rejections_button.clicked.connect(self.on_rejections_click)
+            self.side_bar.complaints_button.clicked.connect(self.on_complaints_click)
+            self.side_bar.moderation_button.clicked.connect(self.on_moderation_click)
 
         self.central_layout.addWidget(self.side_bar, stretch=2)
 
@@ -80,9 +95,13 @@ class HomePage(Page):
         # TEMP #
         for i in range(10):
             fp = FilePreview(f"File #{i}", "Lorem ipsum e pluribus ...", i)
-            fp.edit_file_label.clicked.connect(lambda: self.on_edit_file_click(i))
+            fp.edit_file_label.clicked.connect(lambda file_id: self.on_edit_file_click(i))
             self.file_container_layout.addWidget(fp)
         # TEMP #
+    
+    def on_sign_out_click(self):
+        self.sign_out_requested.emit()
+        self.navigate_to_sign_in.emit()
     
     def on_edit_file_click(self, file_id: int):
         self.navigate_to_file_edit.emit(file_id)
@@ -99,12 +118,20 @@ class HomePage(Page):
     def on_history_click(self):
         self.navigate_to_history.emit()
 
-    def on_complaints_click(self):
-        self.navigate_to_complaints.emit()
+    def on_invites_click(self):
+        self.navigate_to_invites.emit()
+
+    def on_blacklist_click(self):
+        self.navigate_to_blacklist.emit()
+
+    def on_applications_click(self):
+        self.navigate_to_applications.emit()
 
     def on_rejections_click(self):
         self.navigate_to_rejections.emit()
     
-    def on_sign_out_click(self):
-        self.sign_out_requested.emit()
-        self.navigate_to_sign_in.emit()
+    def on_complaints_click(self):
+        self.navigate_to_complaints.emit()
+
+    def on_moderation_click(self):
+        self.navigate_to_moderation.emit()
