@@ -211,12 +211,24 @@ class HomeSideBar(QWidget):
         self.history_button = SecondaryButton("History")
         self.central_layout.addWidget(self.history_button)
 
+        self.invites_button = SecondaryButton("Invites")
+        self.central_layout.addWidget(self.invites_button)
+
+        self.blacklist_button = SecondaryButton("Blacklist")
+        self.central_layout.addWidget(self.blacklist_button)
+
         if self.account_type == "SUPER":
-            self.complaints_button = SecondaryButton("Complaints")
-            self.central_layout.addWidget(self.complaints_button)
+            self.applications_button = SecondaryButton("Applications")
+            self.central_layout.addWidget(self.applications_button)
 
             self.rejections_button = SecondaryButton("Rejections")
             self.central_layout.addWidget(self.rejections_button)
+
+            self.complaints_button = SecondaryButton("Complaints")
+            self.central_layout.addWidget(self.complaints_button)
+
+            self.moderation_button = SecondaryButton("Moderation")
+            self.central_layout.addWidget(self.moderation_button)
 
         self.central_layout.addStretch()
 
