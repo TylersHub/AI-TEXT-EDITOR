@@ -142,7 +142,7 @@ class SignInPage(Page):
                 session_token = data["session_token"]
                 account_type = data["account_type"].upper()
             else:
-                raise requests.exceptions.RequestException(f"Invalid success value '{data["success"]}")
+                raise requests.exceptions.RequestException(f"Invalid success value '{data["success"]}'")
         except requests.exceptions.RequestException as e:
             print(f"Error fetching data: {e}")
 
