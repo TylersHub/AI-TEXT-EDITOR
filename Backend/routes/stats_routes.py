@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify
-from Backend.config import supabase
-from Backend.utils import require_role
+from config import supabase
+from utils import require_role
 
 stats_bp = Blueprint('stats', __name__)
 

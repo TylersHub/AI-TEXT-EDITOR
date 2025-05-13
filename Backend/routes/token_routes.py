@@ -1,7 +1,7 @@
 # token_routes.py
 from flask import Blueprint, request, jsonify
-from Backend.config import supabase
-from Backend.utils import update_user_tokens, get_user_tokens, require_role
+from config import supabase
+from utils import update_user_tokens, get_user_tokens, require_role
 
 token_bp = Blueprint('token', __name__)
 

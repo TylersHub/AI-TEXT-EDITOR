@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
-from Backend.config import supabase
-from Backend.utils import log_action, require_role, update_user_tokens
+from config import supabase
+from utils import log_action, require_role, update_user_tokens
 
 invite_bp = Blueprint('invite', __name__)
 

@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
-from Backend.config import supabase
-from Backend.utils import log_action, require_role
-from Backend.utils import get_user_tokens, update_user_tokens, log_action, check_blacklisted_words
+from config import supabase
+from utils import log_action, require_role
+from utils import get_user_tokens, update_user_tokens, log_action, check_blacklisted_words
 
 import time
 

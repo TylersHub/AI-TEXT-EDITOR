@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
-from Backend.config import supabase
-from Backend.utils import log_action, require_role
-from Backend.routes.session_routes import create_session
+from config import supabase
+from utils import log_action, require_role
+from routes.session_routes import create_session
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -12,7 +12,7 @@ def signup():
     required = ['email', 'password', 'first_name', 'last_name']
     missing = [field for field in required if field not in data]
     if missing:
-        return jsonify({'success': False, 'error': f"Missing fields: {', '.join(missing)}"}), 400
+        return jsonify({'success': False, 'error': f'Missing fields: {', '.join(missing)}'}), 400
 
     # Check if email already exists
     existing = supabase.table('users').select('id').eq('email', data['email']).execute().data
