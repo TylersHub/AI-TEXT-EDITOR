@@ -121,7 +121,9 @@ class SignInPage(Page):
             headers = {"Content-Type": "application/json"}
 
             response = requests.post("http://127.0.0.1:5000/auth/login", json=login_data, headers=headers)
-            response.raise_for_status()
+
+            if response.status_code not in (200, 401):
+                response.raise_for_status()
 
             data = response.json()
 
