@@ -152,9 +152,9 @@ class SideBar(QWidget):
     # Side Bar Signals
     navigate_to_token_purchase = pyqtSignal()
     navigate_to_settings = pyqtSignal()
+    navigate_to_blacklist = pyqtSignal()
     navigate_to_history = pyqtSignal()
     navigate_to_invites = pyqtSignal()
-    navigate_to_blacklist = pyqtSignal()
 
     # Side Bar Admin Signals
     navigate_to_applications = pyqtSignal()
@@ -226,17 +226,18 @@ class SideBar(QWidget):
         self.settings_button.clicked.connect(self.navigate_to_settings.emit)
         self.central_layout.addWidget(self.settings_button)
 
-        self.history_button = SecondaryButton("History")
-        self.history_button.clicked.connect(self.navigate_to_history.emit)
-        self.central_layout.addWidget(self.history_button)
-
-        self.invites_button = SecondaryButton("Invites")
-        self.invites_button.clicked.connect(self.navigate_to_invites.emit)
-        self.central_layout.addWidget(self.invites_button)
-
         self.blacklist_button = SecondaryButton("Blacklist")
         self.blacklist_button.clicked.connect(self.navigate_to_blacklist.emit)
         self.central_layout.addWidget(self.blacklist_button)
+
+        if account_type in ("PAID", "SUPER"):
+            self.history_button = SecondaryButton("History")
+            self.history_button.clicked.connect(self.navigate_to_history.emit)
+            self.central_layout.addWidget(self.history_button)
+
+            self.invites_button = SecondaryButton("Invites")
+            self.invites_button.clicked.connect(self.navigate_to_invites.emit)
+            self.central_layout.addWidget(self.invites_button)
 
         if account_type == "SUPER":
             self.applications_button = SecondaryButton("Applications")
@@ -312,5 +313,44 @@ class FilePreview(QWidget):
 
         self.edit_file_label = ActionLabel("Edit File")
         self.file_info_layout.addWidget(self.edit_file_label)
+
+        self.central_layout.addStretch()
+
+class TopBar(QWidget):
+    def __init__(self, file_count: int, correction_count: int, tokens_used: int):
+        super().__init__()
+
+        self.setStyleSheet(
+            f"{type(self).__name__} {{"
+            f"background-color: {primary_color.darker(105).name()};"
+            f"border: 2px solid {dark_text_color.lighter(400).name()};"
+            "}"
+        )
+
+        self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
+        self.__init_body(file_count, correction_count, tokens_used)
+
+    def __init_body(self, file_count: int, correction_count: int, tokens_used: int):
+        self.central_layout = QHBoxLayout(self)
+        self.central_layout.setContentsMargins(16, 16, 16, 16)
+        self.central_layout.setSpacing(16)
+
+        self.central_layout.addStretch()
+
+        self.file_count_label = QLabel(f"File Count: {file_count}")
+        self.file_count_label.setStyleSheet(f"color: {dark_text_color.name()}; font-size: 16px;")
+        self.central_layout.addWidget(self.file_count_label)
+
+        self.central_layout.addStretch()
+
+        self.correction_count_label = QLabel(f"Correction Count: {correction_count}")
+        self.correction_count_label.setStyleSheet(f"color: {dark_text_color.name()}; font-size: 16px;")
+        self.central_layout.addWidget(self.correction_count_label)
+
+        self.central_layout.addStretch()
+
+        self.tokens_used_label = QLabel(f"Tokens Used: {tokens_used}")
+        self.tokens_used_label.setStyleSheet(f"color: {dark_text_color.name()}; font-size: 16px;")
+        self.central_layout.addWidget(self.tokens_used_label)
 
         self.central_layout.addStretch()
