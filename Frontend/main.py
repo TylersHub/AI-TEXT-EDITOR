@@ -162,6 +162,10 @@ class MainWindow(QMainWindow):
 
         self.load_page(page, pars)
 
+    def closeEvent(self, event):
+        self.clear_session_credentials()
+        event.accept()
+
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = MainWindow()
