@@ -22,6 +22,7 @@ class MainWindow(QMainWindow):
 
         self.session_token = None
         self.account_type = None
+        self.user_id = None
 
         # Page Storage
 
@@ -48,9 +49,10 @@ class MainWindow(QMainWindow):
 
         self.showMaximized()
 
-    def store_session_credentials(self, token: str, acc_type: str):
+    def store_session_credentials(self, token: str, acc_type: str, user_id: str):
         self.session_token = token
         self.account_type = acc_type
+        self.user_id = user_id
 
     def clear_session_credentials(self):
         try:
@@ -64,9 +66,10 @@ class MainWindow(QMainWindow):
 
         self.session_token = None
         self.account_type = None
+        self.user_id = None
 
-    def authenticate_session_credentials(self) -> bool:        
-        if not self.session_token or not self.account_type or (self.account_type != "FREE" and self.account_type != "PAID" and self.account_type != "SUPER"):
+    def authenticate_session_credentials(self) -> bool:
+        if not self.session_token or not self.account_type or not self.user_id or (self.account_type != "FREE" and self.account_type != "PAID" and self.account_type != "SUPER"):
             self.clear_session_credentials()
             return False
 
@@ -132,7 +135,7 @@ class MainWindow(QMainWindow):
 
         # Load New Page
         if page == "Home":
-            self.pages[page] = HomePage(self.session_token, self.account_type)
+            self.pages[page] = HomePage(self.session_token, self.account_type, self.user_id)
 
             # Side Bar Slots
             self.connect_side_bar(page)
