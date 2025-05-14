@@ -271,52 +271,6 @@ class SideBar(QWidget):
         self.sign_out_requested.emit()
         self.navigate_to_sign_in.emit()
 
-class FilePreview(QWidget):
-    def __init__(self, file_name: str, file_head: str, file_id: int):
-        super().__init__()
-
-        self.setStyleSheet(
-            f"{type(self).__name__} {{"
-            f"background-color: {primary_color.darker(105).name()};"
-            "border: 0px;"
-            "}"
-        )
-
-        self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
-        self.setSizePolicy(QSizePolicy.Policy.MinimumExpanding, QSizePolicy.Policy.Minimum)
-        self.__init_body(file_name, file_head, file_id)
-
-    def __init_body(self, file_name: str, file_head: str, file_id: int):
-        self.central_layout = QHBoxLayout(self)
-        self.central_layout.setContentsMargins(0, 0, 0, 0)
-        self.central_layout.setSpacing(16)
-
-        self.file_icon = QLabel("🗎")
-        self.file_icon.setStyleSheet(f"background-color: {dark_text_color.name()}; color: {primary_color.name()}; font-size: 56px; border-radius: 16px;")
-        self.file_icon.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.file_icon.setFixedSize(100, 100)
-        self.central_layout.addWidget(self.file_icon)
-
-        self.file_info_layout = QVBoxLayout()
-        self.file_info_layout.setContentsMargins(0, 0, 0, 0)
-        self.file_info_layout.setSpacing(0)
-        self.central_layout.addLayout(self.file_info_layout)
-
-        self.file_name = QLabel(file_name)
-        self.file_name.setStyleSheet(f"color: {dark_text_color.name()}; font-size: 24px; font-weight: 600;")
-        self.file_info_layout.addWidget(self.file_name)
-
-        self.file_head = QLabel(file_head)
-        self.file_head.setStyleSheet(f"color: {dark_text_color.name()}; font-size: 16px;")
-        self.file_info_layout.addWidget(self.file_head)
-
-        self.file_info_layout.addStretch()
-
-        self.edit_file_label = ActionLabel("Edit File")
-        self.file_info_layout.addWidget(self.edit_file_label)
-
-        self.central_layout.addStretch()
-
 class TopBar(QWidget):
     def __init__(self, file_count: int, correction_count: int, tokens_used: int):
         super().__init__()
@@ -353,5 +307,51 @@ class TopBar(QWidget):
         self.tokens_used_label = QLabel(f"Tokens Used: {tokens_used}")
         self.tokens_used_label.setStyleSheet(f"color: {dark_text_color.name()}; font-size: 16px;")
         self.central_layout.addWidget(self.tokens_used_label)
+
+        self.central_layout.addStretch()
+
+class FilePreview(QWidget):
+    def __init__(self, file_name: str, file_head: str):
+        super().__init__()
+
+        self.setStyleSheet(
+            f"{type(self).__name__} {{"
+            f"background-color: {primary_color.darker(105).name()};"
+            "border: 0px;"
+            "}"
+        )
+
+        self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
+        self.setSizePolicy(QSizePolicy.Policy.MinimumExpanding, QSizePolicy.Policy.Minimum)
+        self.__init_body(file_name, file_head)
+
+    def __init_body(self, file_name: str, file_head: str):
+        self.central_layout = QHBoxLayout(self)
+        self.central_layout.setContentsMargins(0, 0, 0, 0)
+        self.central_layout.setSpacing(16)
+
+        self.file_icon = QLabel("🗎")
+        self.file_icon.setStyleSheet(f"background-color: {dark_text_color.name()}; color: {primary_color.name()}; font-size: 56px; border-radius: 16px;")
+        self.file_icon.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.file_icon.setFixedSize(100, 100)
+        self.central_layout.addWidget(self.file_icon)
+
+        self.file_info_layout = QVBoxLayout()
+        self.file_info_layout.setContentsMargins(0, 0, 0, 0)
+        self.file_info_layout.setSpacing(0)
+        self.central_layout.addLayout(self.file_info_layout)
+
+        self.file_name = QLabel(file_name)
+        self.file_name.setStyleSheet(f"color: {dark_text_color.name()}; font-size: 24px; font-weight: 600;")
+        self.file_info_layout.addWidget(self.file_name)
+
+        self.file_head = QLabel(file_head)
+        self.file_head.setStyleSheet(f"color: {dark_text_color.name()}; font-size: 16px;")
+        self.file_info_layout.addWidget(self.file_head)
+
+        self.file_info_layout.addStretch()
+
+        self.edit_file_label = ActionLabel("Edit File")
+        self.file_info_layout.addWidget(self.edit_file_label)
 
         self.central_layout.addStretch()
