@@ -2,6 +2,7 @@ from flask import request, jsonify
 from config import supabase
 import re
 
+
 # Get the user role from Supabase
 def get_user_role(user_id):
     res = supabase.table('users').select('user_type').eq('id', user_id).execute()
@@ -45,13 +46,20 @@ def check_blacklisted_words(text):
 def require_role(roles):
     def decorator(func):
         def wrapper(*args, **kwargs):
-            data = request.get_json()
-            user_id = data.get('user_id') or request.args.get('user_id')
+            # Try to get user_id from multiple sources
+            user_id = (
+                request.view_args.get('user_id') if request.view_args else None
+                or request.args.get('user_id')
+                or (request.get_json(silent=True) or {}).get('user_id')
+            )
+
             if not user_id:
                 return jsonify({'error': 'Missing user_id'}), 400
+
             role = get_user_role(user_id)
             if role not in roles:
                 return jsonify({'error': f'Access denied: requires {roles} role'}), 403
+
             return func(*args, **kwargs)
         wrapper.__name__ = func.__name__
         return wrapper
