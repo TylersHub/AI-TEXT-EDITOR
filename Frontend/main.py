@@ -44,44 +44,51 @@ class MainWindow(QMainWindow):
         self.central_widget.addWidget(self.pages["SignIn"])
         self.central_widget.addWidget(self.pages["SignUp"])
 
-        ###########################
-        ###### TEMP: TESTING ######
-        # self.session_token = 12345
-        # self.account_type = "PAID"
-        # self.switch_to_page("Home")
-        ###### TEMP: TESTING ######
-        ###########################
-
         # End Of Setup
 
         self.showMaximized()
 
-    def store_session_credentials(self, token, acc_type):
+    def store_session_credentials(self, token: str, acc_type: str):
         self.session_token = token
         self.account_type = acc_type
 
     def clear_session_credentials(self):
-        # API ENDPOINT #
-        # Tell Backend To Discard Session Token
-        # API ENDPOINT #
+        try:
+            session_data = {"session_token": self.session_token}
+            headers = {"Content-Type": "application/json"}
+
+            response = requests.post("http://127.0.0.1:5000/auth/logout", json=session_data, headers=headers)
+            response.raise_for_status()
+        except requests.exceptions.RequestException as e:
+            print(f"Error clearing session: {e}")
 
         self.session_token = None
         self.account_type = None
 
-    def authenticate_session_credentials(self) -> bool:
+    def authenticate_session_credentials(self) -> bool:        
         if not self.session_token or not self.account_type or (self.account_type != "FREE" and self.account_type != "PAID" and self.account_type != "SUPER"):
-            self.session_token = None
-            self.account_type = None
-
+            self.clear_session_credentials()
             return False
-        
-        # API ENDPOINT #
-        # Ask Backend To Verify Session Token And Account Type
-        # API ENDPOINT #
-        
-        # TEMP
-        return True
-        # TEMP
+
+        try:
+            # session_data = {"session_token": self.session_token, "account_type": self.account_type}
+            session_data = {"session_token": self.session_token} # TEMP
+            headers = {"Content-Type": "application/json"}
+
+            response = requests.post("http://127.0.0.1:5000/auth/session/validate", json=session_data, headers=headers)
+            response.raise_for_status()
+
+            data = response.json()
+
+            if data["valid"]:
+                print("All good!")
+                return True
+            else:
+                raise requests.exceptions.RequestException("Invalid session token")
+        except requests.exceptions.RequestException as e:
+            print(f"Error authenticating session: {e}")
+            self.clear_session_credentials()
+            return False
 
     def connect_side_bar(self, page: str):
         # Session Slots
@@ -91,9 +98,9 @@ class MainWindow(QMainWindow):
         # Side Bar Slots
         self.pages[page].side_bar.navigate_to_token_purchase.connect(lambda: self.switch_to_page("BuyTokens"))
         self.pages[page].side_bar.navigate_to_settings.connect(lambda: self.switch_to_page("Settings"))
+        self.pages[page].side_bar.navigate_to_blacklist.connect(lambda: self.switch_to_page("Blacklist"))
         self.pages[page].side_bar.navigate_to_history.connect(lambda: self.switch_to_page("History"))
         self.pages[page].side_bar.navigate_to_invites.connect(lambda: self.switch_to_page("Invites"))
-        self.pages[page].side_bar.navigate_to_blacklist.connect(lambda: self.switch_to_page("Blacklist"))
 
         # Side Bar Admin Slots
         self.pages[page].side_bar.navigate_to_applications.connect(lambda: self.switch_to_page("Applications"))
@@ -116,6 +123,7 @@ class MainWindow(QMainWindow):
                     self.unload_page(pg)
 
             self.central_widget.setCurrentWidget(self.pages["SignIn"])
+
             return
 
         # Unload Page If It Already Exists
