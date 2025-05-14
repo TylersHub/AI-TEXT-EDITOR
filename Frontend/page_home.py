@@ -1,6 +1,6 @@
 from PyQt6.QtWidgets import QHBoxLayout, QVBoxLayout, QLabel, QScrollArea, QWidget
 from PyQt6.QtCore import Qt, pyqtSignal
-from util_widgets import Page, SideBar, PrimaryButton, FilePreview
+from util_widgets import Page, SideBar, TopBar, PrimaryButton, FilePreview
 from util_widgets import primary_color, dark_text_color
 
 import requests
@@ -10,22 +10,18 @@ class HomePage(Page):
     navigate_to_file_edit = pyqtSignal(int)
     navigate_to_file_create = pyqtSignal()
 
-    def __init__(self, session_token: int, account_type: str):
+    def __init__(self, session_token: str, account_type: str, user_id: str):
         super().__init__()
 
         self.session_token = session_token
         self.account_type = account_type
+        self.user_id = user_id
 
         self.central_layout = QHBoxLayout(self)
         self.central_layout.setContentsMargins(0, 0, 0, 0)
         self.central_layout.setSpacing(0)
 
-        # user_name, token_count = self.fetch_username_and_tokens(session_token)
-
-        # TEMP #
-        user_name = "test101"
-        token_count = 1337
-        # TEMP #
+        user_name, token_count = self.fetch_side_bar_data()
 
         self.side_bar = SideBar(account_type, user_name, token_count)
         self.central_layout.addWidget(self.side_bar, stretch=1)
@@ -39,6 +35,12 @@ class HomePage(Page):
         self.body_header.setStyleSheet(f"color: {dark_text_color.name()}; font-size: 32px; font-weight: 600;")
         self.body_header.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.body_layout.addWidget(self.body_header)
+
+        if account_type in ("PAID", "SUPER"):
+            submission_count, correction_count, tokens_used = self.fetch_top_bar_data()
+
+            self.top_bar = TopBar(submission_count, correction_count, tokens_used)
+            self.body_layout.addWidget(self.top_bar)
 
         self.file_scroll_area = QScrollArea()
         self.file_scroll_area.setWidgetResizable(True)
@@ -54,37 +56,93 @@ class HomePage(Page):
         self.file_container_layout.setSpacing(16)
         self.file_container.setLayout(self.file_container_layout)
 
-        self.__init_files()
+        if account_type in ("PAID", "SUPER"):
+            self.file_previews = []
+            self.__init_file_previews()
+        else:
+            self.file_container_layout.addStretch()
+
+            self.upgrade_message = QLabel("Buy Tokens to save files!")
+            self.upgrade_message.setStyleSheet(f"color: {dark_text_color.name()}; font-size: 24px; font-weight: 600;")
+            self.file_container_layout.addWidget(self.upgrade_message)
+            self.file_container_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+            self.file_container_layout.addStretch()
 
         self.new_file_button = PrimaryButton("New File")
         self.new_file_button.clicked.connect(self.navigate_to_file_create.emit)
         self.body_layout.addWidget(self.new_file_button)
         self.body_layout.setAlignment(self.new_file_button, Qt.AlignmentFlag.AlignHCenter)
 
-    def fetch_username_and_tokens(self) -> tuple[str, str]:
-        # API ENDPOINT #
-        # Ask Backend To Return First Name And Token Count Of User
-        # API ENDPOINT #
+    def fetch_side_bar_data(self) -> tuple[str, str]:
+        first_name = "?"
+        token_count = "?"
 
-        pass
+        try:
+            headers = {"Content-Type": "application/json"}
+            
+            response = requests.get(f"http://127.0.0.1:5000/user/sidebar/{self.user_id}", headers=headers)
+            response.raise_for_status()
 
-    def fetch_file_previews(self) -> list:
-        # API ENDPOINT #
-        # Ask Backend To Return File Details For All Files Of User
-        # File Details: File Name, File Head, File ID
-        # API ENDPOINT #
-        
-        pass
+            data = response.json()
+
+            first_name = data["first_name"]
+            token_count = data["tokens"]
+        except requests.exceptions.RequestException as e:
+            print(f"Error fetching side bar data: {e}")
+
+        return (first_name, token_count)
+
+    def fetch_top_bar_data(self) -> tuple[str, str, str]:
+        submission_count = "?"
+        correction_count = "?"
+        tokens_used = "?"
+
+        try:
+            headers = {"Content-Type": "application/json"}
+            
+            response = requests.get(f"http://127.0.0.1:5000/stats/{self.user_id}", headers=headers)
+            response.raise_for_status()
+
+            data = response.json()
+
+            submission_count = data["total_submissions"]
+            correction_count = data["total_corrections"]
+            tokens_used = data["total_tokens_used"]
+        except requests.exceptions.RequestException as e:
+            print(f"Error fetching top bar data: {e}")
+
+        return (submission_count, correction_count, tokens_used)
+
+    def fetch_file_previews(self) -> list[dict]:
+        file_previews = []
+
+        try:
+            headers = {"Content-Type": "application/json"}
+
+            response = requests.get(f"http://127.0.0.1:5000/documents/previews/{self.user_id}", headers=headers)
+            response.raise_for_status()
+
+            file_previews = response.json()
+        except requests.exceptions.RequestException as e:
+            print(f"Error fetching file previews: {e}")
+
+        return file_previews
     
-    def __init_files(self):
-        # file_previews = self.fetch_file_previews()
+    def __init_file_previews(self):
+        file_prevs = self.fetch_file_previews()
 
-        # for file_prev in file_previews:
-        #     ...
+        for file_prev in file_prevs:
+            file_pr = FilePreview(file_prev["title"], file_prev["preview"])
+            file_pr.edit_file_label.clicked.connect(lambda: self.navigate_to_file_edit.emit(file_prev["id"]))
+            self.file_previews.append(file_pr)
+            self.file_container_layout.addWidget(file_pr)
 
         # TEMP #
-        for i in range(10):
-            fp = FilePreview(f"File #{i}", "Lorem ipsum e pluribus ...", i)
-            fp.edit_file_label.clicked.connect(lambda file_id: self.navigate_to_file_edit.emit(i))
-            self.file_container_layout.addWidget(fp)
+        # for i in range(1):
+        #     fp = FilePreview(f"File #{i}", "Lorem ipsum e pluribus ...", i)
+        #     fp.edit_file_label.clicked.connect(lambda file_id: self.navigate_to_file_edit.emit(i))
+        #     self.file_container_layout.addWidget(fp)
+
+        # self.file_container_layout.addStretch(1)
         # TEMP #
