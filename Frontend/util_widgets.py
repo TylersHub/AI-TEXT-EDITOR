@@ -283,6 +283,7 @@ class FilePreview(QWidget):
         )
 
         self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
+        self.setSizePolicy(QSizePolicy.Policy.MinimumExpanding, QSizePolicy.Policy.Minimum)
         self.__init_body(file_name, file_head, file_id)
 
     def __init_body(self, file_name: str, file_head: str, file_id: int):
