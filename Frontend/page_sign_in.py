@@ -6,7 +6,7 @@ from util_functions import validate_email, validate_password
 import requests
 
 class SignInPage(Page):
-    session_credentials_received = pyqtSignal(int, str)
+    session_credentials_received = pyqtSignal(str, str)
     navigate_to_home = pyqtSignal()
     navigate_to_sign_up = pyqtSignal()
 
