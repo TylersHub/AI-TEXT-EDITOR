@@ -122,3 +122,19 @@ def deny_upgrade():
     }).eq('id', request_id).execute()
 
     return jsonify({'message': 'Upgrade request denied'})
+
+
+# Approve regular free account (super only)
+@auth_bp.route('/auth/approve-account', methods=['POST'])
+@require_role(['super'])
+def approve_free_account():
+    data = request.get_json()
+    user_id = data.get('user_id')
+
+    if not user_id:
+        return jsonify({'error': 'Missing user_id'}), 400
+
+    supabase.table('users').update({'approved': True}) \
+        .eq('id', user_id).execute()
+
+    return jsonify({'message': 'User approved successfully'})
