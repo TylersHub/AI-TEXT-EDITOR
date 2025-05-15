@@ -14,7 +14,7 @@ from Backend.app import app as flask_app
 from llm.llm_local import ensure_ollama_ready
 
 # GUI
-from frontend.main import MainWindow
+from Frontend.main import MainWindow
 
 MODEL = "llama3.2"
 

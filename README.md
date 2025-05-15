@@ -1,6 +1,6 @@
 ## HungryText
 
-#A group project based on an LLM-powered text editor, for CCNY's Spring 2025 Software Engineering course.
+A group project based on an LLM-powered text editor, for CCNY's Spring 2025 Software Engineering course.
 
 Intended Instructions when app is finished:
 1. Double-click HungryText.exe to start.
@@ -10,3 +10,9 @@ Intended Instructions when app is finished:
    - Install HungryText Application
 
 No Python installation or command line required.
+
+
+
+Pyinstaller Build/Packaging Command:
+
+pyinstaller --onefile --windowed --paths=./ --name=HungryText run_app/main.py

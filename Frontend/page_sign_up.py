@@ -1,7 +1,7 @@
 from PyQt6.QtWidgets import QVBoxLayout
 from PyQt6.QtCore import pyqtSignal
-from frontend.util_widgets import Page, HeaderText, InputLabel, InputField, InputWarningLabel, ActionLabel, PrimaryButton
-from frontend.util_functions import validate_name, validate_email, validate_password
+from Frontend.util_widgets import Page, HeaderText, InputLabel, InputField, InputWarningLabel, ActionLabel, PrimaryButton
+from Frontend.util_functions import validate_name, validate_email, validate_password
 
 import requests
 

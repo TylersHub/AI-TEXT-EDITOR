@@ -1,5 +1,26 @@
-.venv
-venv
+# -----------------------------
+# Python Virtual Environments
+# -----------------------------
 .venv/
-__pycache__
+venv/
+.venv
+
+# -----------------------------
+# Python Compiled Files
+# -----------------------------
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# -----------------------------
+# Environment Variables
+# -----------------------------
 .env
+
+# -----------------------------
+# PyInstaller Build Artifacts
+# -----------------------------
+/build/
+/dist/
+*.spec

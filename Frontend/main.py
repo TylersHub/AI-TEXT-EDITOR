@@ -1,10 +1,10 @@
 from PyQt6.QtWidgets import QMainWindow, QStackedWidget
 from PyQt6.QtCore import Qt
 
-from frontend.page_sign_in import SignInPage
-from frontend.page_sign_up import SignUpPage
-from frontend.page_home import HomePage
-from frontend.page_llm_test import LLMTestPage
+from Frontend.page_sign_in import SignInPage
+from Frontend.page_sign_up import SignUpPage
+from Frontend.page_home import HomePage
+from Frontend.page_llm_test import LLMTestPage
 
 class MainWindow(QMainWindow):
     def __init__(self):
