@@ -100,7 +100,7 @@ class MainWindow(QMainWindow):
 
         # Side Bar Slots
         self.pages[page].side_bar.navigate_to_token_purchase.connect(lambda: self.switch_to_page("BuyTokens"))
-        self.pages[page].side_bar.navigate_to_settings.connect(lambda: self.switch_to_page("Settings"))
+        self.pages[page].side_bar.navigate_to_home.connect(lambda: self.switch_to_page("Home"))
         self.pages[page].side_bar.navigate_to_blacklist.connect(lambda: self.switch_to_page("Blacklist"))
         self.pages[page].side_bar.navigate_to_history.connect(lambda: self.switch_to_page("History"))
         self.pages[page].side_bar.navigate_to_invites.connect(lambda: self.switch_to_page("Invites"))
