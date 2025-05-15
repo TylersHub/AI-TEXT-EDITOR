@@ -1,0 +1,88 @@
+
+
+stoic_volhard
+
+#############################################################################
+
+ways-to-keep-containers-open
+
+podman run -d --name podman_detached alpine sleep 1000
+
+podman run -d --name podman_dev_null alpine tail -f /dev/null
+
+podman run -d --name podman_sleep alpine sleep infinity
+
+podman run -d --name podman_loop alpine sh -c "while true; do sleep 1; done"
+
+podman run -d --name podman_cat alpine cat
+
+podman run -d --name podman_restart --restart=always alpine sleep 1000
+
+podman generate systemd --new --name podman_systemd > /etc/systemd/system/podman_systemd.service# Enable Service
+systemctl enable podman_systemd.service# Start Service
+systemctl start podman_systemd.service
+
+
+podman pod create --name podman_pod
+
+podman run -d --pod podman_pod alpine sleep 1000
+
+*/10 * * * * podman start podman_container
+
+
+podman logs podman_container
+
+podman run -d --memory=1024m --cpus=1 alpine
+
+#############################################################################
+
+the-gui-command-sigh
+
+podman run -it --rm -v $XAUTHORITY:$XAUTHORITY:ro -v /tmp/.X11-unix:/tmp/.X11-unix:ro -e "DISPLAY" guidevpod:0.5A busybox/sh
+
+podman run -it --rm -v $XAUTHORITY:$XAUTHORITY:ro -v /tmp/.X11-unix:/tmp/.X11-unix:ro -e "DISPLAY" guidevpod:A.2 busybox/sh
+
+podman run -it --rm -v $XAUTHORITY:$XAUTHORITY:ro -v /tmp/.X11-unix:/tmp/.X11-unix:ro -e "DISPLAY" guidevpod-01:latest busybox/sh
+
+podman run -it --rm -v $XAUTHORITY:$XAUTHORITY:ro -v /tmp/.X11-unix:/tmp/.X11-unix:ro -e "DISPLAY" uguidevpod-01:latest
+
+podman run -it --rm -v $XAUTHORITY:$XAUTHORITY:ro -v /tmp/.X11-unix:/tmp/.X11-unix:ro -e "DISPLAY" slatebox-2:latest
+
+podman run -it --rm -v $XAUTHORITY:$XAUTHORITY:ro -v /tmp/.X11-unix:/tmp/.X11-unix:ro --userns keep-id -e "DISPLAY" --security-opt label=type:container_runtime_t x11guipod:latest xeyes
+
+podman run -it --rm -v $XAUTHORITY:$XAUTHORITY:ro -v /tmp/.X11-unix:/tmp/.X11-unix:ro --userns keep-id -e "DISPLAY" --security-opt label=type:container_runtime_t docker.io/andrewmackrodt/firefox-x11:latest firefox
+
+podman run -it --rm -v $XAUTHORITY:$XAUTHORITY:ro -v /tmp/.X11-unix:/tmp/.X11-unix:ro --userns keep-id -e "DISPLAY" --security-opt label=type:container_runtime_t localhost/guidevpod-01:latest i3
+
+podman run -it --rm -v $XAUTHORITY:$XAUTHORITY:ro -v /tmp/.X11-unix:/tmp/.X11-unix:ro --userns keep-id -e "DISPLAY" --security-opt label=type:container_runtime_t localhost/x11guipod:latest
+
+podman run -it --rm -v $XAUTHORITY:$XAUTHORITY:ro -v /tmp/.X11-unix:/tmp/.X11-unix:ro --userns keep-id -e "DISPLAY"  --security-opt label=type:container_runtime_t localhost/guidevpod-02:latest kate
+
+podman run -it --rm -v $XAUTHORITY:$XAUTHORITY:ro -v /tmp/.X11-unix:/tmp/.X11-unix:ro --userns keep-id -e "DISPLAY" --security-opt label=type:container_runtime_t localhost/guidevpod-02:latest /bin/bash
+
+
+
+
+
+
+#############################################################################
+
+podman run -it --rm -v $XAUTHORITY:$XAUTHORITY:ro -v /tmp/.X11-unix:/tmp/.X11-unix:ro -e "DISPLAY" --network=pasta:--map-gw guidevpod:0.5A busybox/sh
+
+podman run -it --rm -v $XAUTHORITY:$XAUTHORITY:ro -v /tmp/.X11-unix:/tmp/.X11-unix:ro -e "DISPLAY" --network=host guidevpod:0.5A busybox/sh
+
+podman run -it --rm -v $XAUTHORITY:$XAUTHORITY:ro -v /tmp/.X11-unix:/tmp/.X11-unix:ro -e "DISPLAY" --network=host --env-host guidevpod:0.5A busybox/sh
+
+podman run -it --rm -v $XAUTHORITY:$XAUTHORITY:ro -v /tmp/.X11-unix:/tmp/.X11-unix:ro -e "DISPLAY" --env-host -p 127.0.0.1:8080:80 guidevpod:0.5A busybox/sh
+
+podman run -it --rm -v $XAUTHORITY:$XAUTHORITY:ro -v /tmp/.X11-unix:/tmp/.X11-unix:ro -e "DISPLAY" -p 127.0.0.1:8080:80 guidevpod:0.5A busybox/sh
+
+podman run -it --rm -v $XAUTHORITY:$XAUTHORITY:ro -v /tmp/.X11-unix:/tmp/.X11-unix:ro -e "DISPLAY" -p 8080:80 guidevpod:0.5A busybox/sh
+
+
+
+podman run -it --rm -v $XAUTHORITY:$XAUTHORITY:ro -v /tmp/.X11-unix:/tmp/.X11-unix:ro -e "DISPLAY" -p 8051:5000 guidevpod:0.5A busybox/sh
+
+podman run -it --rm -v $XAUTHORITY:$XAUTHORITY:ro -v /tmp/.X11-unix:/tmp/.X11-unix:ro -e "DISPLAY" -p 8052:5000 guidevpod:0.5A busybox/sh
+
+podman run -it --rm -v $XAUTHORITY:$XAUTHORITY:ro -v /tmp/.X11-unix:/tmp/.X11-unix:ro -e "DISPLAY" -p 8052:5000 devdb:0.1 bash
