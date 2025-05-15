@@ -17,7 +17,7 @@ def _ollama_path():
     # Fallback to system-installed Ollama
     return shutil.which("ollama")
 
-def ensure_ollama_ready(model="llama3.2"):
+def ensure_ollama_ready(model="llama3:8b"):
     """
     Ensures the Ollama daemon is running and the specified model is pulled.
     - Starts Ollama if not already running.

@@ -16,7 +16,7 @@ from llm.llm_local import ensure_ollama_ready
 # GUI
 from Frontend.main import MainWindow
 
-MODEL = "llama3.2"
+MODEL = "llama3:8b"
 
 def run_flask():
     flask_app.run(port=5000, debug=False, use_reloader=False)

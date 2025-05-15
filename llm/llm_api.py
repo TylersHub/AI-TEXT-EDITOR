@@ -1,15 +1,13 @@
-# LLM is struggling with censoring words...
-
 import requests
 import json
 
-def generate_with_ollama(prompt: str, model: str = "llama3.2", stream: bool = True):
+def generate_with_ollama(prompt: str, model: str = "llama3:8b", stream: bool = True):
     """
     Sends a prompt to the local Ollama LLM and prints the response (streamed if enabled).
 
     Args:
         prompt (str): The input text to send to the LLM.
-        model (str): The model name (e.g. "llama3", "deepseek", etc.)
+        model (str): The model name (e.g. "llama3:8b", "mistral:instruct", etc.)
         stream (bool): Whether to stream the response.
 
     Returns:

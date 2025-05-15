@@ -1,6 +1,4 @@
-# Below is code which allows text to display as it streams from llm output
-
-from PyQt6.QtCore import QThread, pyqtSignal # Allows LLM output stream to run in a separate thread
+from PyQt6.QtCore import QThread, pyqtSignal  # Allows LLM output stream to run in a separate thread
 import requests
 import json
 
@@ -8,7 +6,7 @@ class LLMStreamWorker(QThread):
     token_received = pyqtSignal(str)
     finished = pyqtSignal()
 
-    def __init__(self, prompt: str, model: str = "llama3.2"):
+    def __init__(self, prompt: str, model: str = "llama3:8b"):
         super().__init__()
         self.prompt = prompt
         self.model = model
