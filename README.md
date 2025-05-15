@@ -15,4 +15,4 @@ No Python installation or command line required.
 
 Pyinstaller Build/Packaging Command:
 
-pyinstaller --onefile --windowed --paths=./ --name=HungryText run_app/main.py
+pyinstaller --onefile --windowed --paths=./ --name=HungryText run_app/main_app.py
