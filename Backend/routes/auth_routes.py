@@ -19,13 +19,14 @@ def signup():
     if existing:
         return jsonify({'success': False, 'error': 'Email already registered'}), 400
 
-    # Insert user
+    # Insert unapproved free user
     res = supabase.table('users').insert({
         'email': data['email'],
         'password': data['password'],
         'first_name': data['first_name'],
         'last_name': data['last_name'],
-        'user_type': data.get('user_type', 'free')
+        'user_type': 'free',
+        'approved': False
     }).execute()
     
     return jsonify({'success': True, 'user': res.data[0]}), 201
@@ -42,6 +43,10 @@ def login():
         return jsonify({'success': False, 'error': 'Invalid credentials'}), 401
 
     user = res.data[0]
+
+    # Check if user is approved
+    if not user.get('approved', False):
+        return jsonify({'success': False, 'error': 'Account pending approval'}), 403
 
     # Check for lockout (free users)
     if user['user_type'] == 'free':
@@ -67,6 +72,7 @@ def login():
         'account_type': user['user_type'],
         'user_id': user['id']
     })
+
 
 
 # Submit a request to upgrade to paid
