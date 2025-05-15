@@ -6,7 +6,7 @@ from Frontend.util_functions import validate_email, validate_password
 import requests
 
 class SignInPage(Page):
-    session_credentials_received = pyqtSignal(int, str)
+    session_credentials_received = pyqtSignal(str, str, str)
     navigate_to_home = pyqtSignal()
     navigate_to_sign_up = pyqtSignal()
     navigate_to_llm_test = pyqtSignal()
@@ -43,10 +43,6 @@ class SignInPage(Page):
 
         self.password_warning_label = InputWarningLabel("Invalid password")
         self.central_layout.addWidget(self.password_warning_label)
-
-        # self.forgot_password_label = ActionLabel("Forgot password?")
-        # self.forgot_password_label.clicked.connect(self.on_forgot_password_click)
-        # self.central_layout.addWidget(self.forgot_password_label)
 
         # Call-To-Action
 
@@ -86,6 +82,7 @@ class SignInPage(Page):
         incorrect_input = False
         session_token = None
         account_type = None
+        user_id = None
 
         # Email Input Validation
 
@@ -128,7 +125,7 @@ class SignInPage(Page):
 
             response = requests.post("http://127.0.0.1:5000/auth/login", json=login_data, headers=headers)
 
-            if response.status_code not in (200, 401):
+            if response.status_code not in (200, 401, 403):
                 response.raise_for_status()
 
             data = response.json()
@@ -140,6 +137,9 @@ class SignInPage(Page):
                 elif data["error"] == "Account temporarily locked":
                     self.email_warning_label.setText("Account temporarily locked")
                     self.password_warning_label.setText("Account temporarily locked")
+                elif data["error"] == "Account pending approval":
+                    self.email_warning_label.setText("Account pending approval")
+                    self.password_warning_label.setText("Account pending approval")
                 else:
                     raise requests.exceptions.RequestException(f"Invalid failure message '{data['error']}'")
                     
@@ -149,6 +149,7 @@ class SignInPage(Page):
             elif data["success"] == True:
                 session_token = data["session_token"]
                 account_type = data["account_type"].upper()
+                user_id = data["user_id"]
             else:
                 raise requests.exceptions.RequestException(f"Invalid success value '{data['success']}'")
         except requests.exceptions.RequestException as e:
@@ -165,13 +166,13 @@ class SignInPage(Page):
             return
 
         self.__flush()
-        self.session_credentials_received.emit(session_token, account_type)
+        self.session_credentials_received.emit(session_token, account_type, user_id)
         self.navigate_to_home.emit()
         
     def on_sign_up_click(self):
         self.__flush()
         self.navigate_to_sign_up.emit()
-    
+
     def __on_llm_test_click(self):
         print("🧪 LLM test link clicked!")
         self.navigate_to_llm_test.emit()

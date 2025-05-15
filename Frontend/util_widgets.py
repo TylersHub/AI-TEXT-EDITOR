@@ -1,6 +1,8 @@
 from PyQt6.QtWidgets import QWidget, QLabel, QLineEdit, QPushButton, QSizePolicy, QVBoxLayout, QHBoxLayout
 from PyQt6.QtGui import QColor, QCursor
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, pyqtSignal
+
+import requests
 
 # Color Palette
 primary_color = QColor("#F8F8FF")
@@ -144,8 +146,25 @@ class SecondaryButton(QPushButton):
 
         self.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
 
-class HomeSideBar(QWidget):
-    def __init__(self, account_type: str, user_name: str, token_count: int):
+class SideBar(QWidget):
+    # Session Signals
+    sign_out_requested = pyqtSignal()
+    navigate_to_sign_in = pyqtSignal()
+
+    # Side Bar Signals
+    navigate_to_token_purchase = pyqtSignal()
+    navigate_to_home = pyqtSignal()
+    navigate_to_blacklist = pyqtSignal()
+    navigate_to_history = pyqtSignal()
+    navigate_to_invites = pyqtSignal()
+
+    # Side Bar Admin Signals
+    navigate_to_applications = pyqtSignal()
+    navigate_to_rejections = pyqtSignal()
+    navigate_to_complaints = pyqtSignal()
+    navigate_to_moderation = pyqtSignal()
+    
+    def __init__(self, account_type: str, user_id: str):
         super().__init__()
 
         self.setStyleSheet(
@@ -154,14 +173,31 @@ class HomeSideBar(QWidget):
             "}"
         )
 
+        self.user_name, self.token_count = self.fetch_side_bar_data(user_id)
+
         self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
+        self.__init_body(account_type)
 
-        self.account_type = account_type
-        self.user_name = user_name
-        self.token_count = token_count
-        self.__init_body()
+    def fetch_side_bar_data(self, user_id) -> tuple[str, str]:
+        first_name = "?"
+        token_count = "?"
 
-    def __init_body(self):
+        try:
+            headers = {"Content-Type": "application/json"}
+            
+            response = requests.get(f"http://127.0.0.1:5000/user/sidebar/{user_id}", headers=headers)
+            response.raise_for_status()
+
+            data = response.json()
+
+            first_name = data["first_name"]
+            token_count = data["tokens"]
+        except requests.exceptions.RequestException as e:
+            print(f"Error fetching side bar data: {e}")
+
+        return (first_name, token_count)
+
+    def __init_body(self, account_type: str):
         self.central_layout = QVBoxLayout(self)
         self.central_layout.setContentsMargins(32, 32, 32, 32)
         self.central_layout.setSpacing(32)
@@ -188,9 +224,9 @@ class HomeSideBar(QWidget):
         self.token_layout = QHBoxLayout()
         self.central_layout.addLayout(self.token_layout)
 
-        self.token_count = QLabel(f"Tokens: {self.token_count}")
-        self.token_count.setStyleSheet(f"color: {primary_color.name()}; font-size: 24px;")
-        self.token_layout.addWidget(self.token_count)
+        self.token_count_label = QLabel(f"Tokens: {self.token_count}")
+        self.token_count_label.setStyleSheet(f"color: {primary_color.name()}; font-size: 24px;")
+        self.token_layout.addWidget(self.token_count_label)
 
         self.token_layout.addStretch()
 
@@ -198,6 +234,7 @@ class HomeSideBar(QWidget):
         self.buy_token_button.setStyleSheet(f"background-color: {primary_color.name()}; color: {dark_text_color.name()}; font-size: 16px; border-radius: 16px;")
         self.buy_token_button.setMinimumSize(32, 32)
         self.buy_token_button.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
+        self.buy_token_button.clicked.connect(self.navigate_to_token_purchase.emit)
         self.token_layout.addWidget(self.buy_token_button)
 
         self.bar_two = QWidget()
@@ -205,18 +242,39 @@ class HomeSideBar(QWidget):
         self.bar_two.setFixedHeight(2)
         self.central_layout.addWidget(self.bar_two)
 
-        self.settings_button = SecondaryButton("Settings")
-        self.central_layout.addWidget(self.settings_button)
+        self.home_button = SecondaryButton("Home")
+        self.home_button.clicked.connect(self.navigate_to_home.emit)
+        self.central_layout.addWidget(self.home_button)
 
-        self.history_button = SecondaryButton("History")
-        self.central_layout.addWidget(self.history_button)
+        self.blacklist_button = SecondaryButton("Blacklist")
+        self.blacklist_button.clicked.connect(self.navigate_to_blacklist.emit)
+        self.central_layout.addWidget(self.blacklist_button)
 
-        if self.account_type == "SUPER":
-            self.complaints_button = SecondaryButton("Complaints")
-            self.central_layout.addWidget(self.complaints_button)
+        if account_type in ("PAID", "SUPER"):
+            self.history_button = SecondaryButton("History")
+            self.history_button.clicked.connect(self.navigate_to_history.emit)
+            self.central_layout.addWidget(self.history_button)
+
+            self.invites_button = SecondaryButton("Invites")
+            self.invites_button.clicked.connect(self.navigate_to_invites.emit)
+            self.central_layout.addWidget(self.invites_button)
+
+        if account_type == "SUPER":
+            self.applications_button = SecondaryButton("Applications")
+            self.applications_button.clicked.connect(self.navigate_to_applications.emit)
+            self.central_layout.addWidget(self.applications_button)
 
             self.rejections_button = SecondaryButton("Rejections")
+            self.rejections_button.clicked.connect(self.navigate_to_rejections.emit)
             self.central_layout.addWidget(self.rejections_button)
+
+            self.complaints_button = SecondaryButton("Complaints")
+            self.complaints_button.clicked.connect(self.navigate_to_complaints.emit)
+            self.central_layout.addWidget(self.complaints_button)
+
+            self.moderation_button = SecondaryButton("Moderation")
+            self.moderation_button.clicked.connect(self.navigate_to_moderation.emit)
+            self.central_layout.addWidget(self.moderation_button)
 
         self.central_layout.addStretch()
 
@@ -226,10 +284,80 @@ class HomeSideBar(QWidget):
         self.central_layout.addWidget(self.bar_three)
 
         self.sign_out_button = SecondaryButton("Sign Out")
+        self.sign_out_button.clicked.connect(self.sign_out)
         self.central_layout.addWidget(self.sign_out_button)
 
+    def update_token_count_penalty(self, penalty: int):
+        self.token_count_label.setText(f"Tokens: {self.token_count} (-{penalty})")
+
+    def sign_out(self):
+        self.sign_out_requested.emit()
+        self.navigate_to_sign_in.emit()
+
+class TopBar(QWidget):
+    def __init__(self, user_id: str):
+        super().__init__()
+
+        self.setStyleSheet(
+            f"{type(self).__name__} {{"
+            f"background-color: {primary_color.darker(105).name()};"
+            f"border: 2px solid {dark_text_color.lighter(400).name()};"
+            "}"
+        )
+
+        file_count, correction_count, tokens_used = self.fetch_top_bar_data(user_id)
+
+        self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
+        self.__init_body(file_count, correction_count, tokens_used)
+
+    def fetch_top_bar_data(self, user_id) -> tuple[str, str, str]:
+        submission_count = "?"
+        correction_count = "?"
+        tokens_used = "?"
+
+        try:
+            headers = {"Content-Type": "application/json"}
+            
+            response = requests.get(f"http://127.0.0.1:5000/stats/{user_id}", headers=headers)
+            response.raise_for_status()
+
+            data = response.json()
+
+            submission_count = data["total_submissions"]
+            correction_count = data["total_corrections"]
+            tokens_used = data["total_tokens_used"]
+        except requests.exceptions.RequestException as e:
+            print(f"Error fetching top bar data: {e}")
+
+        return (submission_count, correction_count, tokens_used)
+
+    def __init_body(self, file_count: int, correction_count: int, tokens_used: int):
+        self.central_layout = QHBoxLayout(self)
+        self.central_layout.setContentsMargins(16, 16, 16, 16)
+        self.central_layout.setSpacing(16)
+
+        self.central_layout.addStretch()
+
+        self.file_count_label = QLabel(f"File Count: {file_count}")
+        self.file_count_label.setStyleSheet(f"color: {dark_text_color.name()}; font-size: 16px;")
+        self.central_layout.addWidget(self.file_count_label)
+
+        self.central_layout.addStretch()
+
+        self.correction_count_label = QLabel(f"Correction Count: {correction_count}")
+        self.correction_count_label.setStyleSheet(f"color: {dark_text_color.name()}; font-size: 16px;")
+        self.central_layout.addWidget(self.correction_count_label)
+
+        self.central_layout.addStretch()
+
+        self.tokens_used_label = QLabel(f"Tokens Used: {tokens_used}")
+        self.tokens_used_label.setStyleSheet(f"color: {dark_text_color.name()}; font-size: 16px;")
+        self.central_layout.addWidget(self.tokens_used_label)
+
+        self.central_layout.addStretch()
+
 class FilePreview(QWidget):
-    def __init__(self, file_name: str, file_head: str, file_id: int):
+    def __init__(self, file_name: str, file_head: str):
         super().__init__()
 
         self.setStyleSheet(
@@ -240,9 +368,10 @@ class FilePreview(QWidget):
         )
 
         self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
-        self.__init_body(file_name, file_head, file_id)
+        self.setSizePolicy(QSizePolicy.Policy.MinimumExpanding, QSizePolicy.Policy.Minimum)
+        self.__init_body(file_name, file_head)
 
-    def __init_body(self, file_name: str, file_head: str, file_id: int):
+    def __init_body(self, file_name: str, file_head: str):
         self.central_layout = QHBoxLayout(self)
         self.central_layout.setContentsMargins(0, 0, 0, 0)
         self.central_layout.setSpacing(16)
