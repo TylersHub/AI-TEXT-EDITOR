@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
 from config import supabase
 from utils import log_action, require_role
+from datetime import datetime, timezone
 from utils import get_user_tokens, update_user_tokens, log_action, check_blacklisted_words
 
 import time
@@ -40,13 +41,30 @@ def submit_text():
         update_user_tokens(user_id, -total_cost)
         log_action(user_id, 'submission_cost', f'Used {total_cost} tokens')
 
+    now = datetime.now(timezone.utc).isoformat()
+
+    # Insert the document
     doc = supabase.table('documents').insert({
         'owner_id': user_id,
         'title': data.get('title', 'Untitled Document'),
-        'content': censored
-    }).execute()
+        'content': censored,
+        'created_at': now,
+        'updated_at': now
+    }).execute().data[0]
 
-    return jsonify({'document': doc.data[0], 'tokens_used': total_cost})
+    # Log the token usage as a "submission" in the corrections table
+    if total_cost > 0:
+        supabase.table('corrections').insert({
+            'document_id': doc['id'],
+            'user_id': user_id,
+            'type': 'submission',
+            'original_text': text,
+            'corrected_text': censored,
+            'tokens_used': total_cost,
+            'created_at': now
+        }).execute()
+
+    return jsonify({'document': doc, 'tokens_used': total_cost})
 
 @submission_bp.route('/documents/previews/<user_id>', methods=['GET'])
 @require_role(['paid', 'super'])
@@ -69,7 +87,7 @@ def file_previews(user_id):
 # users can open a full document (for editing or review)
 
 @submission_bp.route('/documents/<doc_id>', methods=['GET'])
-@require_role(['paid', 'super'])
+@require_role(['free', 'paid', 'super']) 
 def open_document(doc_id):
     res = supabase.table('documents') \
         .select('id, title, content, owner_id, updated_at') \
