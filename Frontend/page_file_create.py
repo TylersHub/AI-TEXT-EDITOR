@@ -152,7 +152,7 @@ class FileCreatePage(Page):
     def attempt_submission(self, text: str) -> tuple[bool, str]:
         success = None
         file_id = None
-        
+
         try:
             submission_data = {"user_id": self.user_id, "text": text}
             headers = {"Content-Type": "application/json"}
@@ -166,29 +166,45 @@ class FileCreatePage(Page):
                 self.side_bar.sign_out_requested.emit()
                 self.side_bar.navigate_to_sign_in.emit()
 
-                success = False
+                return False, None
+
             elif response.status_code == 400:
                 data = response.json()
-
-                self.penalty += int(data["penalty"])
+                self.penalty += int(data.get("penalty", 0))
 
                 self.side_bar.update_token_count_penalty(self.penalty)
-                self.type_submission_warning_label.setText(data["error"])
+                self.type_submission_warning_label.setText(data.get("error", "Unknown error"))
                 self.type_submission_warning_label.toggle_text(True)
 
-                success = False
-            else:
-                response.raise_for_status()
+                return False, None
+
+            # ✅ Raise exception if status is not 2xx
+            response.raise_for_status()
+
+            # ✅ Debug output
+            print("📥 Raw response text:", response.text)
 
             data = response.json()
+            print("📦 Parsed response data:", data)
 
-            success = True
-            file_id = data["document"]["id"]
+            # ✅ Safely access document ID
+            if "document" in data and "id" in data["document"]:
+                file_id = data["document"]["id"]
+                success = True
+            else:
+                print("❌ 'document' or 'id' key missing in response.")
+                success = False
+
         except requests.exceptions.RequestException as e:
-            print(f"Error locking out free account: {e}")
-            sucess = False
+            print(f"❌ Error during submission: {e}")
+            success = False
+        except KeyError as e:
+            print(f"❌ Key error: {e}")
+            print("📦 Full data:", data)
+            success = False
 
-        return (success, file_id)
+        return success, file_id
+
     
     def on_file_upload_click(self):
         pass

@@ -184,9 +184,6 @@ class FileEditPage(Page):
 
 
     def generate_llm_suggestions(self, file_content: str):
-        if not file_content.strip():
-            print("⚠️ generate_llm_suggestions skipped — file_content is empty.")
-            return
 
         try:
             prompt = (

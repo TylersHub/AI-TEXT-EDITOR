@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, g
 from Backend.config import supabase
 from Backend.utils import log_action, require_role
 from Backend.utils import get_user_tokens, update_user_tokens, log_action, check_blacklisted_words
@@ -49,7 +49,7 @@ def submit_text():
     return jsonify({'document': doc.data[0], 'tokens_used': total_cost})
 
 @submission_bp.route('/documents/previews/<user_id>', methods=['GET'])
-@require_role(['paid', 'super'])
+#@require_role(['free', 'paid', 'super'])
 def file_previews(user_id):
     docs = supabase.table('documents') \
         .select('id, title, content') \
@@ -69,8 +69,9 @@ def file_previews(user_id):
 # users can open a full document (for editing or review)
 
 @submission_bp.route('/documents/<doc_id>', methods=['GET'])
-@require_role(['paid', 'super'])
+#@require_role(['free', 'paid', 'super'])
 def open_document(doc_id):
+    #user_id = g.user_id
     res = supabase.table('documents') \
         .select('id, title, content, owner_id, updated_at') \
         .eq('id', doc_id).execute()

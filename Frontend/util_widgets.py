@@ -373,24 +373,33 @@ class FileEditSideBar(QWidget):
         self.__init_body(new_file, edit_mode)
 
     def fetch_file_data(self, user_id: str, file_id: str) -> tuple[str, str]:
-        file_name = ""
-        file_content = ""
-
         try:
+            url = f"http://127.0.0.1:5000/documents/{file_id}?user_id={user_id}"
+            print(f"📡 Requesting file content from: {url}")
             headers = {"Content-Type": "application/json"}
-            
-            response = requests.get(f"http://127.0.0.1:5000/documents/{file_id}?user_id={user_id}", headers=headers)
-            response.raise_for_status()
+            response = requests.get(url, headers=headers)
 
+            print(f"📡 Response status: {response.status_code}")
+            print(f"📦 Response body: {response.text}")
+
+            response.raise_for_status()
             data = response.json()
 
-            file_name = data["title"]
-            file_content = data["content"]
-        except requests.exceptions.RequestException as e:
-            print(f"Error fetching file edit side bar data: {e}")
-            self.file_loading_failed = True
+            file_name = data.get("title", "Untitled")
+            file_content = data.get("content", "")
 
-        return (file_name, file_content)
+            if not file_content.strip():
+                print("⚠️ File content is empty.")
+            else:
+                print("✅ File content loaded successfully.")
+
+            return file_name, file_content
+
+        except requests.exceptions.RequestException as e:
+            print(f"❌ Error fetching file edit side bar data: {e}")
+            self.file_loading_failed = True
+            return "Untitled", ""
+
 
     def __init_body(self, new_file: bool, edit_mode: str):
         self.central_layout = QVBoxLayout(self)
