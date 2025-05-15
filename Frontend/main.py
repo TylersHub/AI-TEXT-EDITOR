@@ -7,6 +7,7 @@ import requests
 from page_sign_in import SignInPage
 from page_sign_up import SignUpPage
 from page_home import HomePage
+from page_file_create import FileCreatePage
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -30,6 +31,7 @@ class MainWindow(QMainWindow):
             "SignIn": SignInPage(),
             "SignUp": SignUpPage(),
             "Home": None,
+            "FileCreate": None,
         }
 
         # Page Slots
@@ -143,8 +145,16 @@ class MainWindow(QMainWindow):
             self.pages[page].navigate_to_file_create.connect(lambda: self.switch_to_page("FileCreate"))
             self.pages[page].navigate_to_file_edit.connect(lambda file_id: self.switch_to_page("FileEdit", {"file_id": file_id}))
         elif page == "FileCreate":
-            pass
+            self.pages[page] = FileCreatePage(self.session_token, self.account_type, self.user_id)
+
+            # Side Bar Slots
+            self.connect_side_bar(page)
+
+            # Submission Slot
+            self.pages[page].navigate_to_file_edit.connect(lambda file_id, edit_mode: self.switch_to_page("FileEdit", {"file_id": file_id, "edit_mode": edit_mode}))
         elif page == "FileEdit":
+            # self.pages[page] = FileEditPage(self.session_token, self.account_type, self.user_id, pars["file_id"], pars["edit_mode"])
+
             pass
 
         self.central_widget.addWidget(self.pages[page])
