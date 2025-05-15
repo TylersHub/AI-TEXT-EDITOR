@@ -46,11 +46,20 @@ def check_blacklisted_words(text):
 def require_role(roles):
     def decorator(func):
         def wrapper(*args, **kwargs):
-            user_id = (
-                (request.view_args or {}).get('user_id') or
-                request.args.get('user_id') or
-                (request.get_json(silent=True) or {}).get('user_id')
-            )
+            user_id = None
+
+            # 1. Check URL path params (e.g., /documents/<user_id>)
+            if request.view_args and 'user_id' in request.view_args:
+                user_id = request.view_args['user_id']
+
+            # 2. Check query string (e.g., ?user_id=...)
+            elif 'user_id' in request.args:
+                user_id = request.args['user_id']
+
+            # 3. Check JSON body (e.g., { "user_id": ... })
+            elif request.is_json:
+                data = request.get_json(silent=True)
+                user_id = data.get('user_id') if data else None
 
             if not user_id:
                 return jsonify({'error': 'Missing user_id'}), 400
