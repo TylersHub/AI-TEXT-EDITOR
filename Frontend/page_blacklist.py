@@ -43,11 +43,37 @@ class BlacklistPage(Page):
 
         self.body_layout.addStretch()
 
+        self.body_header = QLabel("Pending Blacklist Suggestions")
+        self.body_header.setStyleSheet(f"color: {dark_text_color.name()}; font-size: 32px; font-weight: 600;")
+        self.body_header.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.body_layout.addWidget(self.body_header)
+
+        blacklist_suggestions = self.fetch_blacklist_suggestions()
+
+        print(blacklist_suggestions)
+
+        
+
+    def fetch_blacklist_suggestions(self):
+        suggestions = []
+
+        try:
+            headers = {"Content-Type": "application/json"}
+
+            response = requests.get(f"http://127.0.0.1:5000/blacklist/submissions?user_id={self.user_id}", headers=headers)
+            response.raise_for_status()
+
+            suggestions = response.json()
+        except requests.exceptions.RequestException as e:
+            print(f"Error fetching black submissions: {e}")
+
+        return suggestions
+
     def on_suggest_bl_button_click(self):
         suggestion = self.suggest_bl_input.text()
 
         try:
-            internal_data = {"word": suggestion}
+            internal_data = {"user_id": self.user_id, "word": suggestion}
             headers = {"Content-Type": "application/json"}
 
             response = requests.post(f"http://127.0.0.1:5000/blacklist", json=internal_data, headers=headers)
