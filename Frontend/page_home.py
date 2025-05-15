@@ -94,11 +94,4 @@ class HomePage(Page):
             self.file_previews.append(file_pr)
             self.file_container_layout.addWidget(file_pr)
 
-        # TEMP #
-        # for i in range(1):
-        #     fp = FilePreview(f"File #{i}", "Lorem ipsum e pluribus ...", i)
-        #     fp.edit_file_label.clicked.connect(lambda file_id: self.navigate_to_file_edit.emit(i))
-        #     self.file_container_layout.addWidget(fp)
-
-        # self.file_container_layout.addStretch(1)
-        # TEMP #
+        self.file_container_layout.addStretch(1)
