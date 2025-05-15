@@ -35,3 +35,24 @@ def deduct_tokens():
 
     new_balance = update_user_tokens(user_id, -amount)
     return jsonify({'message': 'Tokens deducted', 'new_balance': new_balance})
+
+# any user can deduct tokens from themselves
+
+@token_bp.route('/tokens/charge', methods=['POST'])
+def charge_token():
+    data = request.get_json()
+    user_id = data.get('user_id')
+    amount = data.get('amount', 1)  # defaults to 1 token
+
+    if not user_id:
+        return jsonify({'error': 'Missing user_id'}), 400
+
+    current = get_user_tokens(user_id)
+    if current < amount:
+        return jsonify({'error': 'Insufficient tokens'}), 400
+
+    new_balance = update_user_tokens(user_id, -amount)
+    return jsonify({
+        'message': f'{amount} token(s) charged',
+        'new_balance': new_balance
+    })

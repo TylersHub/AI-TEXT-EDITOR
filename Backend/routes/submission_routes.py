@@ -1,6 +1,7 @@
-from flask import Blueprint, request, jsonify, g
+from flask import Blueprint, request, jsonify
 from Backend.config import supabase
 from Backend.utils import log_action, require_role
+from datetime import datetime, timezone
 from Backend.utils import get_user_tokens, update_user_tokens, log_action, check_blacklisted_words
 
 import time
@@ -40,16 +41,33 @@ def submit_text():
         update_user_tokens(user_id, -total_cost)
         log_action(user_id, 'submission_cost', f'Used {total_cost} tokens')
 
+    now = datetime.now(timezone.utc).isoformat()
+
+    # Insert the document
     doc = supabase.table('documents').insert({
         'owner_id': user_id,
         'title': data.get('title', 'Untitled Document'),
-        'content': censored
-    }).execute()
+        'content': censored,
+        'created_at': now,
+        'updated_at': now
+    }).execute().data[0]
 
-    return jsonify({'document': doc.data[0], 'tokens_used': total_cost})
+    # Log the token usage as a "submission" in the corrections table
+    if total_cost > 0:
+        supabase.table('corrections').insert({
+            'document_id': doc['id'],
+            'user_id': user_id,
+            'type': 'submission',
+            'original_text': text,
+            'corrected_text': censored,
+            'tokens_used': total_cost,
+            'created_at': now
+        }).execute()
+
+    return jsonify({'document': doc, 'tokens_used': total_cost})
 
 @submission_bp.route('/documents/previews/<user_id>', methods=['GET'])
-#@require_role(['free', 'paid', 'super'])
+@require_role(['paid', 'super'])
 def file_previews(user_id):
     docs = supabase.table('documents') \
         .select('id, title, content') \
@@ -69,9 +87,8 @@ def file_previews(user_id):
 # users can open a full document (for editing or review)
 
 @submission_bp.route('/documents/<doc_id>', methods=['GET'])
-#@require_role(['free', 'paid', 'super'])
+@require_role(['free', 'paid', 'super']) 
 def open_document(doc_id):
-    #user_id = g.user_id
     res = supabase.table('documents') \
         .select('id, title, content, owner_id, updated_at') \
         .eq('id', doc_id).execute()
@@ -87,3 +104,28 @@ def open_document(doc_id):
         'owner_id': doc['owner_id'],
         'updated_at': doc['updated_at']
     })
+
+@submission_bp.route('/documents/<doc_id>', methods=['PUT'])
+@require_role(['paid', 'super'])  # only paid/super can save
+def update_document(doc_id):
+    data = request.get_json()
+    new_title = data.get('title')
+    new_content = data.get('content')
+
+    if not new_title and not new_content:
+        return jsonify({'error': 'Nothing to update'}), 400
+
+    updates = {}
+    if new_title: updates['title'] = new_title
+    if new_content: updates['content'] = new_content
+    updates['updated_at'] = datetime.now(timezone.utc).isoformat()
+
+    supabase.table('documents').update(updates).eq('id', doc_id).execute()
+    return jsonify({'message': 'Document updated'})
+
+
+@submission_bp.route('/documents/<doc_id>', methods=['DELETE'])
+@require_role(['paid', 'super'])
+def delete_document(doc_id):
+    supabase.table('documents').delete().eq('id', doc_id).execute()
+    return jsonify({'message': 'Document deleted'})
