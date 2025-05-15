@@ -9,6 +9,11 @@ from Frontend.page_sign_up import SignUpPage
 from Frontend.page_home import HomePage
 from Frontend.page_file_create import FileCreatePage
 from Frontend.page_file_edit import FileEditPage
+from Frontend.page_buy_tokens import BuyTokensPage
+from Frontend.page_blacklist import BlacklistPage
+from Frontend.page_applications import ApplicationsPage
+from Frontend.page_rejections import RejectionsPage
+from Frontend.page_moderation import ModerationPage
 from Frontend.page_llm_test import LLMTestPage
 
 class MainWindow(QMainWindow):
@@ -35,6 +40,11 @@ class MainWindow(QMainWindow):
             "Home": None,
             "FileCreate": None,
             "FileEdit": None,
+            "BuyTokens": None,
+            "Blacklist": None,
+            "Applications": None,
+            "Rejections": None,
+            "Moderation": None,
             "LLMTest": None,
         }
 

@@ -1,7 +1,7 @@
 from PyQt6.QtWidgets import QVBoxLayout
 from PyQt6.QtCore import pyqtSignal
-from Frontend.util_widgets import Page, HeaderText, InputLabel, InputField, InputWarningLabel, ActionLabel, PrimaryButton
-from Frontend.util_functions import validate_email, validate_password
+from util_widgets import Page, HeaderText, InputLabel, InputField, InputWarningLabel, ActionLabel, PrimaryButton
+from util_functions import validate_email, validate_password
 
 import requests
 
@@ -9,7 +9,6 @@ class SignInPage(Page):
     session_credentials_received = pyqtSignal(str, str, str)
     navigate_to_home = pyqtSignal()
     navigate_to_sign_up = pyqtSignal()
-    navigate_to_llm_test = pyqtSignal()
 
     def __init__(self):
         super().__init__()
@@ -58,11 +57,6 @@ class SignInPage(Page):
 
         self.email_input.returnPressed.connect(self.sign_in_button.click)
         self.password_input.returnPressed.connect(self.sign_in_button.click)
-
-        # LLM Test Link
-        self.llm_test_label = ActionLabel("Try LLM Without Signing In")
-        self.llm_test_label.clicked.connect(self.__on_llm_test_click)
-        self.central_layout.addWidget(self.llm_test_label)
 
         # End Of Layout
 
@@ -141,7 +135,7 @@ class SignInPage(Page):
                     self.email_warning_label.setText("Account pending approval")
                     self.password_warning_label.setText("Account pending approval")
                 else:
-                    raise requests.exceptions.RequestException(f"Invalid failure message '{data['error']}'")
+                    raise requests.exceptions.RequestException(f"Invalid failure message '{data["error"]}'")
                     
                 self.email_warning_label.toggle_text(True)
                 self.password_warning_label.toggle_text(True)
@@ -151,7 +145,7 @@ class SignInPage(Page):
                 account_type = data["account_type"].upper()
                 user_id = data["user_id"]
             else:
-                raise requests.exceptions.RequestException(f"Invalid success value '{data['success']}'")
+                raise requests.exceptions.RequestException(f"Invalid success value '{data["success"]}'")
         except requests.exceptions.RequestException as e:
             print(f"Error fetching data: {e}")
 
@@ -172,7 +166,3 @@ class SignInPage(Page):
     def on_sign_up_click(self):
         self.__flush()
         self.navigate_to_sign_up.emit()
-
-    def __on_llm_test_click(self):
-        print("🧪 LLM test link clicked!")
-        self.navigate_to_llm_test.emit()
