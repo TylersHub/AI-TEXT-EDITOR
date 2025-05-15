@@ -1,4 +1,4 @@
-from PyQt6.QtWidgets import QWidget, QLabel, QLineEdit, QPushButton, QSizePolicy, QVBoxLayout, QHBoxLayout
+from PyQt6.QtWidgets import QWidget, QLabel, QLineEdit, QPushButton, QSizePolicy, QVBoxLayout, QHBoxLayout, QScrollArea
 from PyQt6.QtGui import QColor, QCursor
 from PyQt6.QtCore import Qt, pyqtSignal
 
@@ -356,6 +356,97 @@ class TopBar(QWidget):
 
         self.central_layout.addStretch()
 
+class FileEditSideBar(QWidget):
+    def __init__(self, user_id: str, file_id: str, new_file: bool, edit_mode: str):
+        super().__init__()
+
+        self.setStyleSheet(
+            f"{type(self).__name__} {{"
+            f"background-color: {secondary_color.name()}"
+            "}"
+        )
+
+        self.file_loading_failed = None
+        self.file_name, self.file_content = self.fetch_file_data(user_id, file_id)
+
+        self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
+        self.__init_body(new_file, edit_mode)
+
+    def fetch_file_data(self, user_id: str, file_id: str) -> tuple[str, str]:
+        file_name = ""
+        file_content = ""
+
+        try:
+            headers = {"Content-Type": "application/json"}
+            
+            response = requests.get(f"http://127.0.0.1:5000/documents/{file_id}?user_id={user_id}", headers=headers)
+            response.raise_for_status()
+
+            data = response.json()
+
+            file_name = data["title"]
+            file_content = data["content"]
+        except requests.exceptions.RequestException as e:
+            print(f"Error fetching file edit side bar data: {e}")
+            self.file_loading_failed = True
+
+        return (file_name, file_content)
+
+    def __init_body(self, new_file: bool, edit_mode: str):
+        self.central_layout = QVBoxLayout(self)
+        self.central_layout.setContentsMargins(32, 32, 32, 32)
+        self.central_layout.setSpacing(32)
+
+        self.name_text_box = InputField(self.file_name)
+        self.name_text_box.setStyleSheet(
+            f"color: {dark_text_color.name()};"
+            f"background-color: {primary_color.name()};"
+            f"border: 1px solid {dark_text_color.name()};"
+            "border-radius: 8px;"
+            "padding: 0 4px;"
+            "font-size: 30px;"
+        )
+        self.central_layout.addWidget(self.name_text_box)
+
+        self.bar_one = QWidget()
+        self.bar_one.setStyleSheet(f"background-color: {primary_color.name()};")
+        self.bar_one.setFixedHeight(2)
+        self.central_layout.addWidget(self.bar_one)
+
+        if not new_file:
+            self.invite_button = SecondaryButton("Invite Collaborator")
+            self.central_layout.addWidget(self.invite_button)
+
+            self.report_button = SecondaryButton("Report Collaborator")
+            self.central_layout.addWidget(self.report_button)
+
+            self.central_layout.addStretch()
+
+            self.bar_two = QWidget()
+            self.bar_two.setStyleSheet(f"background-color: {primary_color.name()};")
+            self.bar_two.setFixedHeight(2)
+            self.central_layout.addWidget(self.bar_two)
+
+            self.delete_file_button = SecondaryButton("Delete File")
+            self.central_layout.addWidget(self.delete_file_button)
+        else:
+            if edit_mode == "llm":
+                self.suggestions_area = QScrollArea()
+                self.suggestions_area.setWidgetResizable(True)
+                self.suggestions_area.setStyleSheet(f"background-color: {primary_color.darker(105).name()}; border: 1px solid {dark_text_color.lighter(400).name()};")
+                self.central_layout.addWidget(self.suggestions_area)
+
+                self.suggestion_container = QWidget()
+                self.suggestion_container.setStyleSheet("border: 0px;")
+                self.suggestions_area.setWidget(self.suggestion_container)
+
+                self.suggestion_container_layout = QVBoxLayout()
+                self.suggestion_container_layout.setContentsMargins(16, 16, 16, 16)
+                self.suggestion_container_layout.setSpacing(16)
+                self.suggestion_container.setLayout(self.suggestion_container_layout)
+            else:
+                self.central_layout.addStretch()
+
 class FilePreview(QWidget):
     def __init__(self, file_name: str, file_head: str):
         super().__init__()
@@ -401,3 +492,38 @@ class FilePreview(QWidget):
         self.file_info_layout.addWidget(self.edit_file_label)
 
         self.central_layout.addStretch()
+
+class LLMSuggestion(QWidget):
+    def __init__(self, diff_index, string_index, old_word, new_word):
+        super().__init__()
+
+        self.setStyleSheet(
+            f"{type(self).__name__} {{"
+            f"background-color: {primary_color.darker(105).name()};"
+            "border-bottom: 1px solid;"
+            "}"
+        )
+
+        self.diff_index = diff_index
+        self.string_index = string_index
+
+        self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
+        self.__init_body(old_word, new_word)
+
+    def __init_body(self, old_word, new_word):
+        self.central_layout = QVBoxLayout(self)
+        self.central_layout.setContentsMargins(0, 0, 0, 0)
+        self.central_layout.setSpacing(0)
+
+        self.text_label = QLabel(f"{self.diff_index}: Change {old_word} to {new_word}?")
+        self.text_label.setStyleSheet(f"color: {dark_text_color.name()}")
+        self.central_layout.addWidget(self.text_label)
+        self.central_layout.setAlignment(self.text_label, Qt.AlignmentFlag.AlignCenter)
+
+        self.accept_action_label = ActionLabel("Accept")
+        self.central_layout.addWidget(self.accept_action_label)
+        self.central_layout.setAlignment(self.accept_action_label, Qt.AlignmentFlag.AlignCenter)
+
+        self.reject_action_label = ActionLabel("Reject")
+        self.central_layout.addWidget(self.reject_action_label)
+        self.central_layout.setAlignment(self.reject_action_label, Qt.AlignmentFlag.AlignCenter)

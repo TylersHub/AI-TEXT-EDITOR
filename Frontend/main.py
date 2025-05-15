@@ -8,6 +8,7 @@ from Frontend.page_sign_in import SignInPage
 from Frontend.page_sign_up import SignUpPage
 from Frontend.page_home import HomePage
 from Frontend.page_file_create import FileCreatePage
+from Frontend.page_file_edit import FileEditPage
 from Frontend.page_llm_test import LLMTestPage
 
 class MainWindow(QMainWindow):
@@ -33,6 +34,7 @@ class MainWindow(QMainWindow):
             "SignUp": SignUpPage(),
             "Home": None,
             "FileCreate": None,
+            "FileEdit": None,
             "LLMTest": None,
         }
 
@@ -147,7 +149,7 @@ class MainWindow(QMainWindow):
 
             # File Slots
             self.pages[page].navigate_to_file_create.connect(lambda: self.switch_to_page("FileCreate"))
-            self.pages[page].navigate_to_file_edit.connect(lambda file_id: self.switch_to_page("FileEdit", {"file_id": file_id}))
+            self.pages[page].navigate_to_file_edit.connect(lambda file_id, edit_mode: self.switch_to_page("FileEdit", {"file_id": file_id, "edit_mode": edit_mode, "new_file": False}))
         elif page == "FileCreate":
             self.pages[page] = FileCreatePage(self.session_token, self.account_type, self.user_id)
 
@@ -155,11 +157,12 @@ class MainWindow(QMainWindow):
             self.connect_side_bar(page)
 
             # Submission Slot
-            self.pages[page].navigate_to_file_edit.connect(lambda file_id, edit_mode: self.switch_to_page("FileEdit", {"file_id": file_id, "edit_mode": edit_mode}))
+            self.pages[page].navigate_to_file_edit.connect(lambda file_id, edit_mode: self.switch_to_page("FileEdit", {"file_id": file_id, "edit_mode": edit_mode, "new_file": True}))
         elif page == "FileEdit":
-            # self.pages[page] = FileEditPage(self.session_token, self.account_type, self.user_id, pars["file_id"], pars["edit_mode"])
+            self.pages[page] = FileEditPage(self.session_token, self.account_type, self.user_id, pars["file_id"], pars["edit_mode"], pars["new_file"])
 
-            pass
+            # Side Bar Slots
+            self.connect_side_bar(page)
         elif page == "LLMTest":
             self.pages[page] = LLMTestPage()
 
