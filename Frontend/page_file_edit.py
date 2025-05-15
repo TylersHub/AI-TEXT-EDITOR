@@ -1,7 +1,10 @@
 from PyQt6.QtWidgets import QHBoxLayout, QVBoxLayout, QTextEdit, QLabel
 from PyQt6.QtCore import Qt, pyqtSignal
+from PyQt6.QtGui import QTextCursor
 from util_widgets import Page, SideBar, FileEditSideBar, PrimaryButton, LLMSuggestion
 from util_widgets import primary_color, secondary_color, dark_text_color
+
+# from llm.llm_worker import LLMStreamWorker
 
 import requests
 
@@ -166,25 +169,37 @@ class FileEditPage(Page):
 
         return (output_words_list, mapper)
 
-    def update_llm_suggestions(self, action: str, diff_index, string_index):
-        self.file_edit_side_bar.suggestion_container_layout.removeWidget(self.suggestions[diff_index])
-        self.suggestions[diff_index].deleteLater()
+    # def update_llm_suggestions(self, action: str, diff_index, string_index):
+    #     self.file_edit_side_bar.suggestion_container_layout.removeWidget(self.suggestions[diff_index])
+    #     self.suggestions[diff_index].deleteLater()
 
-        if action == "ACCEPT":
-            self.words_list[string_index] = self.new_file_content_list[string_index]
+    #     if action == "ACCEPT":
+    #         self.words_list[string_index] = self.new_file_content_list[string_index]
 
-            # Charge 1 token
-            self.side_bar.update_token_count_penalty(1)
-        else:
-            self.words_list[string_index] = self.file_content_list[string_index]
+    #         # Charge 1 token
+    #         self.side_bar.update_token_count_penalty(1)
+    #     else:
+    #         self.words_list[string_index] = self.file_content_list[string_index]
 
-        self.file_editor.setHtml(" ".join(self.words_list))
+    #     self.file_editor.setHtml(" ".join(self.words_list))
+
+    # def query_llm(self, prompt: str):
+    #     self.worker = LLMStreamWorker(prompt=prompt)
+    #     self.worker.token_received.connect(self.append_token)
+    #     self.worker.start()
+
+    # def append_token(self, token: str):
+    #     self.file_editor.moveCursor(QTextCursor.MoveOperation.End)
+    #     self.file_editor.insertPlainText(token)
+    #     self.file_editor.ensureCursorVisible()
     
     def generate_llm_suggestions(self, file_content: str):
-        self.file_content_list = file_content.split()
+        self.file_content = "Hello there! This is not correct! One two three!"
+        self.file_content_list = self.file_content.split()
 
-        new_file_content = "" # LLM OUTPUT GOES HERE
-        self.new_file_content_list = new_file_content.split()
+        # new_file_content = self.query_llm(file_content)
+        self.new_file_content = "Hello there! This is naut correct! One three two!"
+        self.new_file_content_list = self.new_file_content.split()
 
         diff = self.get_diff(self.file_content_list, self.new_file_content_list)
         self.words_list = diff[0]
