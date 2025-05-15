@@ -151,7 +151,7 @@ class SideBar(QWidget):
 
     # Side Bar Signals
     navigate_to_token_purchase = pyqtSignal()
-    navigate_to_settings = pyqtSignal()
+    navigate_to_home = pyqtSignal()
     navigate_to_blacklist = pyqtSignal()
     navigate_to_history = pyqtSignal()
     navigate_to_invites = pyqtSignal()
@@ -222,9 +222,9 @@ class SideBar(QWidget):
         self.bar_two.setFixedHeight(2)
         self.central_layout.addWidget(self.bar_two)
 
-        self.settings_button = SecondaryButton("Settings")
-        self.settings_button.clicked.connect(self.navigate_to_settings.emit)
-        self.central_layout.addWidget(self.settings_button)
+        self.home_button = SecondaryButton("Home")
+        self.home_button.clicked.connect(self.navigate_to_home.emit)
+        self.central_layout.addWidget(self.home_button)
 
         self.blacklist_button = SecondaryButton("Blacklist")
         self.blacklist_button.clicked.connect(self.navigate_to_blacklist.emit)
