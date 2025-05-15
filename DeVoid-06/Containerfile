@@ -1,0 +1,46 @@
+
+LABEL version="B.5"
+LABEL description="[NO COMMENT]"
+
+
+FROM ghcr.io/void-linux/void-glibc:20250401r1
+# COPY ./flask-server ./home/flask-server
+
+RUN xbps-install -Su -y
+
+RUN xbps-install postgresql17 postgrest
+
+# RUN xbps-install -y libutf8proc
+# RUN xbps-install -y libutf8proc-devel
+#
+# RUN xbps-install -y thttpd
+
+
+#
+# RUN xbps-install -y xterm
+# RUN xbps-install -y btop
+# RUN xbps-install -y nano
+# RUN xbps-install -y yazi
+# RUN xbps-install -y rox
+#
+#
+# RUN xbps-install -y python3
+# RUN xbps-install -y python3-devel
+# RUN xbps-install -y python3-pip
+# RUN xbps-install -y python3-virtualenv
+#
+# RUN pip install Flask==3.1.0
+#
+# RUN pip install PyQt6==6.8.1
+#
+# RUN pip install ollama==0.4.7
+# RUN pip install ollama-api==0.1.1
+# RUN pip install ollama-batch==0.1.1
+# RUN pip install ollama-cli==0.0.5
+
+ENV DISPLAY=${DISPLAY}
+ENV LANG=en_US.UTF-8
+
+EXPOSE 8080
+ENTRYPOINT ["sh"]
+#CMD busybox/sh

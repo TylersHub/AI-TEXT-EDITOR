@@ -1,0 +1,28 @@
+
+LABEL version="0.3"
+LABEL description="Python3, PyQt, Flask, and Ollama on void-glibc-busybox"
+
+
+FROM ghcr.io/void-linux/void-glibc-busybox
+
+RUN xbps-install -Su -y
+
+RUN xbps-install -y python3
+RUN xbps-install -y python3-devel
+RUN xbps-install -y python3-pip
+RUN xbps-install -y python3-virtualenv
+
+RUN pip install Flask==3.1.0
+
+RUN pip install PyQt6==6.8.1
+
+RUN pip install ollama==0.4.7
+RUN pip install ollama-api==0.1.1
+RUN pip install ollama-batch==0.1.1
+RUN pip install ollama-cli==0.0.5
+
+ENV DISPLAY=${DISPLAY}
+
+EXPOSE 8080
+ENTRYPOINT ["busybox"]
+CMD /bin/bash

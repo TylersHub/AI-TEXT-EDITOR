@@ -1,0 +1,22 @@
+FROM ghcr.io/void-linux/void-glibc-busybox
+COPY pyrequire.txt /home/pyrequire.txt
+
+RUN xbps-install -Su
+
+# RUN xbps-install -y atop
+# RUN xbps-install -y btop
+# RUN xbps-install -y htop
+
+RUN xbps-install -y qhttpengine qhttpengine-devel
+
+RUN xbps-install -y python3
+RUN xbps-install -y python3-devel
+RUN xbps-install -y python3-pip
+# RUN xbps-install -y python3-virtualenv
+
+RUN pip install -r /home/pyrequire.txt
+
+
+EXPOSE 8080
+ENTRYPOINT ["busybox"]
+CMD /bin/bash

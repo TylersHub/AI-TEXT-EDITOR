@@ -1,0 +1,42 @@
+
+LABEL version="A.3"
+LABEL description="Python3, PyQt, Flask, and Ollama; \
+                  also btop, nano, yazi, & rox ; \
+                  on void-glibc-busybox"
+
+
+FROM ghcr.io/void-linux/void-glibc-busybox:latest
+
+
+RUN xbps-install -Su -y
+
+RUN xbps-install -y libutf8proc
+RUN xbps-install -y libutf8proc-devel
+
+RUN xbps-install -y xterm
+RUN xbps-install -y btop
+RUN xbps-install -y nano
+RUN xbps-install -y yazi
+RUN xbps-install -y rox
+
+
+RUN xbps-install -y python3
+RUN xbps-install -y python3-devel
+RUN xbps-install -y python3-pip
+RUN xbps-install -y python3-virtualenv
+
+RUN pip install Flask==3.1.0
+
+RUN pip install PyQt6==6.8.1
+
+RUN pip install ollama==0.4.7
+RUN pip install ollama-api==0.1.1
+RUN pip install ollama-batch==0.1.1
+RUN pip install ollama-cli==0.0.5
+
+ENV DISPLAY=${DISPLAY}
+ENV LANG=en_US.UTF-8
+
+EXPOSE 8080
+ENTRYPOINT ["busybox"]
+#CMD busybox/sh

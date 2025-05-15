@@ -1,0 +1,21 @@
+Flask==3.1.0
+
+PyQt5==5.15.11
+PyQt6==6.8.1
+
+ollama==0.4.7
+ollama-api==0.1.1
+ollama-batch==0.1.1
+ollama-cli==0.0.5
+ollama-gui==1.2.1
+
+Cython==3.0.12
+
+
+### [NOTE]
+# Note that for one-time builds, e.g. for CI/testing, on platforms
+# that are not covered by one of the wheel packages provided on PyPI
+# and the pure Python wheel that we provide is not used, it is
+# substantially faster than a full source build to install an
+# uncompiled (slower) version of Cython with:
+## pip install Cython --install-option="--no-cython-compile"

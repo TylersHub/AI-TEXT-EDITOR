@@ -1,0 +1,22 @@
+FROM ghcr.io/void-linux/void-glibc-busybox
+COPY pyrequire.txt /home/pyrequire.txt
+
+RUN xbps-install -Su
+
+RUN xbps-install -y curl
+RUN curl -fsSL https://ollama.com/install.sh | sh
+
+RUN xbps-install -y atop btop htop
+RUN xbps-install -y qhttpengine qhttpengine-devel
+
+RUN xbps-install -y python3
+RUN xbps-install -y python3-devel
+RUN xbps-install -y python3-pip
+RUN xbps-install -y python3-virtualenv
+
+RUN pip install -r /home/pyrequire.txt
+
+
+EXPOSE 8080
+ENTRYPOINT ["ollama serve"]
+CMD /bin/bash
