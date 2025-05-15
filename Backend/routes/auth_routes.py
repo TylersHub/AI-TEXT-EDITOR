@@ -101,7 +101,7 @@ def approve_upgrade():
 @require_role(['super'])
 def get_upgrade_requests():
     res = supabase.table('upgrade_requests').select(
-        'id, user_id, status, notes, created_at'
+        'id, status, notes, created_at, user_id(id, first_name, last_name, email)'
     ).eq('status', 'pending').execute()
 
     return jsonify(res.data)
