@@ -1,0 +1,40 @@
+FROM aded1e1a5b37
+
+RUN apk add --no-cache python3
+RUN apk add --no-cache py3-setuptools
+RUN apk add --no-cache py3-pip
+
+
+RUN apk add --no-cache cython
+
+RUN apk add --no-cache qt5-qtbase
+RUN apk add --no-cache qt6-qtbase
+RUN apk add --no-cache qt5-qtbase-doc
+RUN apk add --no-cache qt6-qtbase-doc
+
+RUN apk add --no-chache rqlite
+RUN apk add --no-chache rqlite-bench
+RUN apk add --no-chache rqlite-client
+RUN apk add --no-chache rqlite-doc
+
+RUN apk add --no-chache xorgxrdp
+RUN apk add --no-chache xorgxrdp-dev
+RUN apk add --no-chache xorg-server
+RUN apk add --no-chache xorg-server-common
+RUN apk add --no-chache xorg-server-dev
+RUN apk add --no-chache xorg-server-dbg
+RUN apk add --no-chache xorg-server-doc
+RUN apk add --no-chache xorg-server-xephyr
+RUN apk add --no-chache xorg-server-xnest
+
+RUN apk add --no-chache xonsh
+RUN apk add --no-chache xob
+RUN apk add --no-chache xosview
+
+RUN apk add --no-chache x11docker
+RUN apk add --no-chache x11docker-doc
+
+
+EXPOSE 8080
+ENTRYPOINT ["busybox"]
+CMD /bin/bash

@@ -1,0 +1,55 @@
+FROM docker.io/alpine:3.21.3
+
+COPY pyrequire.txt /home/pyrequire.txt
+
+RUN apk add --no-cache python3
+RUN apk add --no-cache py3-setuptools
+RUN apk add --no-cache py3-virtualenv
+RUN apk add --no-cache py3-pip
+
+RUN python3 -m venv /home/pyfiles
+# . /home/pyfiles/bin/activate
+# RUN cd /home/pyfiles
+# RUN ls
+# RUN source bin/activate
+RUN source /home/pyfiles/bin/activate
+
+# RUN /home/pyfiles/bin/pip install -r /home/pyrequire.txt
+
+RUN /home/pyfiles/bin/pip install Flask==3.1.0
+
+# RUN /home/pyfiles/bin/pip install PyQt6==6.8.1
+# RUN /home/pyfiles/bin/pip install PyQt5==5.15.11
+
+RUN /home/pyfiles/bin/pip install ollama==0.4.7
+RUN /home/pyfiles/bin/pip install ollama-api==0.1.1
+RUN /home/pyfiles/bin/pip install ollama-batch==0.1.1
+# RUN /home/pyfiles/bin/pip install ollama-cli==0.0.5
+
+
+RUN apk add --no-cache rqlite
+RUN apk add --no-cache rqlite-bench
+RUN apk add --no-cache rqlite-client
+RUN apk add --no-cache rqlite-doc
+
+RUN apk add --no-cache xorgxrdp
+RUN apk add --no-cache xorgxrdp-dev
+RUN apk add --no-cache xorg-server
+RUN apk add --no-cache xorg-server-common
+RUN apk add --no-cache xorg-server-dev
+RUN apk add --no-cache xorg-server-dbg
+RUN apk add --no-cache xorg-server-doc
+RUN apk add --no-cache xorg-server-xephyr
+RUN apk add --no-cache xorg-server-xnest
+
+# RUN apk add --no-cache xonsh
+# RUN apk add --no-cache xob
+# RUN apk add --no-cache xosview
+
+RUN apk add --no-cache x11docker
+RUN apk add --no-cache x11docker-doc
+
+
+EXPOSE 8080
+ENTRYPOINT ["busybox"]
+CMD /bin/bash
