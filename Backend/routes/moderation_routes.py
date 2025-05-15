@@ -1,7 +1,7 @@
 # moderation_routes.py
 from flask import Blueprint, request, jsonify
-from config import supabase
-from utils import update_user_tokens, require_role
+from Backend.config import supabase
+from Backend.utils import update_user_tokens, require_role
 
 moderation_bp = Blueprint('moderation', __name__)
 
@@ -163,21 +163,3 @@ def resolve_complaint(comp_id):
     }).eq('id', comp_id).execute()
 
     return jsonify({'message': f'Complaint resolved as {decision}, penalty applied to {target_id}'})
-
-# Combines approved + permanent blacklist
-
-@moderation_bp.route('/blacklist/all', methods=['GET'])
-def get_all_blacklisted_words():
-    # Get words from permanent blacklist
-    permanent = supabase.table('blacklist').select('word').execute().data
-    perm_words = [entry['word'] for entry in permanent]
-
-    # Get words from approved submissions (not yet added)
-    approved = supabase.table('blacklist_submissions') \
-        .select('word') \
-        .eq('status', 'approved').execute().data
-    approved_words = [entry['word'] for entry in approved]
-
-    # Combine and deduplicate
-    all_words = list(set(perm_words + approved_words))
-    return jsonify({'blacklisted_words': all_words})

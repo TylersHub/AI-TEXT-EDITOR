@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
-from config import supabase
-from utils import log_action, require_role
-from routes.session_routes import create_session
+from Backend.config import supabase
+from Backend.utils import log_action, require_role
+from Backend.routes.session_routes import create_session
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -12,21 +12,20 @@ def signup():
     required = ['email', 'password', 'first_name', 'last_name']
     missing = [field for field in required if field not in data]
     if missing:
-        return jsonify({'success': False, 'error': f'Missing fields: {', '.join(missing)}'}), 400
+        return jsonify({'success': False, 'error': f"Missing fields: {', '.join(missing)}"}), 400
 
     # Check if email already exists
     existing = supabase.table('users').select('id').eq('email', data['email']).execute().data
     if existing:
         return jsonify({'success': False, 'error': 'Email already registered'}), 400
 
-    # Insert unapproved free user
+    # Insert user
     res = supabase.table('users').insert({
         'email': data['email'],
         'password': data['password'],
         'first_name': data['first_name'],
         'last_name': data['last_name'],
-        'user_type': 'free',
-        'approved': False
+        'user_type': data.get('user_type', 'free')
     }).execute()
     
     return jsonify({'success': True, 'user': res.data[0]}), 201
@@ -43,10 +42,6 @@ def login():
         return jsonify({'success': False, 'error': 'Invalid credentials'}), 401
 
     user = res.data[0]
-
-    # Check if user is approved
-    if not user.get('approved', False):
-        return jsonify({'success': False, 'error': 'Account pending approval'}), 403
 
     # Check for lockout (free users)
     if user['user_type'] == 'free':
@@ -72,7 +67,6 @@ def login():
         'account_type': user['user_type'],
         'user_id': user['id']
     })
-
 
 
 # Submit a request to upgrade to paid
