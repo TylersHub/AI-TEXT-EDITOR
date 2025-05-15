@@ -8,7 +8,7 @@ import requests
 class HomePage(Page):
     # File Signals
     navigate_to_file_create = pyqtSignal()
-    navigate_to_file_edit = pyqtSignal(int)
+    navigate_to_file_edit = pyqtSignal(str, str)
 
     def __init__(self, session_token: str, account_type: str, user_id: str):
         super().__init__()
@@ -90,7 +90,7 @@ class HomePage(Page):
 
         for file_prev in file_prevs:
             file_pr = FilePreview(file_prev["title"], file_prev["preview"])
-            file_pr.edit_file_label.clicked.connect(lambda: self.navigate_to_file_edit.emit(file_prev["id"]))
+            file_pr.edit_file_label.clicked.connect(lambda: self.navigate_to_file_edit.emit(file_prev["id"], "self"))
             self.file_previews.append(file_pr)
             self.file_container_layout.addWidget(file_pr)
 
