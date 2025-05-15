@@ -9,6 +9,7 @@ class SignInPage(Page):
     session_credentials_received = pyqtSignal(int, str)
     navigate_to_home = pyqtSignal()
     navigate_to_sign_up = pyqtSignal()
+    navigate_to_llm_test = pyqtSignal()
 
     def __init__(self):
         super().__init__()
@@ -61,6 +62,11 @@ class SignInPage(Page):
 
         self.email_input.returnPressed.connect(self.sign_in_button.click)
         self.password_input.returnPressed.connect(self.sign_in_button.click)
+
+        # LLM Test Link
+        self.llm_test_label = ActionLabel("Try LLM Without Signing In")
+        self.llm_test_label.clicked.connect(self.__on_llm_test_click)
+        self.central_layout.addWidget(self.llm_test_label)
 
         # End Of Layout
 
@@ -165,3 +171,7 @@ class SignInPage(Page):
     def on_sign_up_click(self):
         self.__flush()
         self.navigate_to_sign_up.emit()
+    
+    def __on_llm_test_click(self):
+        print("🧪 LLM test link clicked!")
+        self.navigate_to_llm_test.emit()
