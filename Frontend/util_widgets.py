@@ -224,9 +224,9 @@ class SideBar(QWidget):
         self.token_layout = QHBoxLayout()
         self.central_layout.addLayout(self.token_layout)
 
-        self.token_count = QLabel(f"Tokens: {self.token_count}")
-        self.token_count.setStyleSheet(f"color: {primary_color.name()}; font-size: 24px;")
-        self.token_layout.addWidget(self.token_count)
+        self.token_count_label = QLabel(f"Tokens: {self.token_count}")
+        self.token_count_label.setStyleSheet(f"color: {primary_color.name()}; font-size: 24px;")
+        self.token_layout.addWidget(self.token_count_label)
 
         self.token_layout.addStretch()
 
@@ -286,6 +286,9 @@ class SideBar(QWidget):
         self.sign_out_button = SecondaryButton("Sign Out")
         self.sign_out_button.clicked.connect(self.sign_out)
         self.central_layout.addWidget(self.sign_out_button)
+
+    def update_token_count_penalty(self, penalty: int):
+        self.token_count_label.setText(f"Tokens: {self.token_count} (-{penalty})")
 
     def sign_out(self):
         self.sign_out_requested.emit()
