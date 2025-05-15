@@ -104,3 +104,28 @@ def open_document(doc_id):
         'owner_id': doc['owner_id'],
         'updated_at': doc['updated_at']
     })
+
+@submission_bp.route('/documents/<doc_id>', methods=['PUT'])
+@require_role(['paid', 'super'])  # only paid/super can save
+def update_document(doc_id):
+    data = request.get_json()
+    new_title = data.get('title')
+    new_content = data.get('content')
+
+    if not new_title and not new_content:
+        return jsonify({'error': 'Nothing to update'}), 400
+
+    updates = {}
+    if new_title: updates['title'] = new_title
+    if new_content: updates['content'] = new_content
+    updates['updated_at'] = datetime.now(timezone.utc).isoformat()
+
+    supabase.table('documents').update(updates).eq('id', doc_id).execute()
+    return jsonify({'message': 'Document updated'})
+
+
+@submission_bp.route('/documents/<doc_id>', methods=['DELETE'])
+@require_role(['paid', 'super'])
+def delete_document(doc_id):
+    supabase.table('documents').delete().eq('id', doc_id).execute()
+    return jsonify({'message': 'Document deleted'})
