@@ -101,7 +101,6 @@ class FileCreatePage(Page):
             f"background-color: {primary_color.darker(110).name()};"
             f"border: 1px solid {dark_text_color.name()};"
             "border-radius: 8px;"
-            "height: 32px;"
             "padding: 0 4px;"
             "font-size: 16px;"
         )
