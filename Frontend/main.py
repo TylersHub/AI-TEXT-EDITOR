@@ -84,7 +84,6 @@ class MainWindow(QMainWindow):
             data = response.json()
 
             if data["valid"]:
-                print("All good!")
                 return True
             else:
                 raise requests.exceptions.RequestException("Invalid session token")
@@ -141,11 +140,11 @@ class MainWindow(QMainWindow):
             self.connect_side_bar(page)
 
             # File Slots
-            self.pages[page].navigate_to_file_edit.connect(lambda file_id: self.switch_to_page("FileEdit", {"file_id": file_id}))
             self.pages[page].navigate_to_file_create.connect(lambda: self.switch_to_page("FileCreate"))
-        elif page == "FileEdit":
-            pass
+            self.pages[page].navigate_to_file_edit.connect(lambda file_id: self.switch_to_page("FileEdit", {"file_id": file_id}))
         elif page == "FileCreate":
+            pass
+        elif page == "FileEdit":
             pass
 
         self.central_widget.addWidget(self.pages[page])
