@@ -1,7 +1,7 @@
 from PyQt6.QtWidgets import QVBoxLayout
 from PyQt6.QtCore import pyqtSignal
-from util_widgets import Page, HeaderText, InputLabel, InputField, InputWarningLabel, ActionLabel, PrimaryButton
-from util_functions import validate_name, validate_email, validate_password
+from Frontend.util_widgets import Page, HeaderText, InputLabel, InputField, InputWarningLabel, ActionLabel, PrimaryButton
+from Frontend.util_functions import validate_name, validate_email, validate_password
 
 import requests
 
@@ -181,12 +181,12 @@ class SignUpPage(Page):
                 if data["error"] == "Account already exists":
                     self.email_warning_label.setText("This email is already registered")
                 else:
-                    raise requests.exceptions.RequestException(f"Invalid failure message '{data["error"]}'")
+                    raise requests.exceptions.RequestException(f"Invalid failure message '{data['error']}'")
                     
                 self.email_warning_label.toggle_text(True)
                 incorrect_input = True
             elif data["success"] != True:
-                raise requests.exceptions.RequestException(f"Invalid success value '{data["success"]}'")
+                raise requests.exceptions.RequestException(f"Invalid success value '{data['success']}'")
         except requests.exceptions.RequestException as e:
             print(f"Error fetching data: {e}")
 

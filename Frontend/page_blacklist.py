@@ -1,7 +1,7 @@
 from PyQt6.QtWidgets import QVBoxLayout, QHBoxLayout, QLabel, QScrollArea, QWidget, QPushButton
 from PyQt6.QtCore import Qt, pyqtSignal
-from util_widgets import Page, SideBar, HeaderText, InputLabel, InputField, InputWarningLabel, ActionLabel, PrimaryButton
-from util_widgets import primary_color, dark_text_color
+from Frontend.util_widgets import Page, SideBar, HeaderText, InputLabel, InputField, InputWarningLabel, ActionLabel, PrimaryButton
+from Frontend.util_widgets import primary_color, dark_text_color
 
 import requests
 
