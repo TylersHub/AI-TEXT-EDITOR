@@ -9,6 +9,7 @@ from page_sign_up import SignUpPage
 from page_home import HomePage
 from page_file_create import FileCreatePage
 from page_file_edit import FileEditPage
+from page_buy_tokens import BuyTokensPage
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -34,6 +35,7 @@ class MainWindow(QMainWindow):
             "Home": None,
             "FileCreate": None,
             "FileEdit": None,
+            "BuyTokens": None,
         }
 
         # Page Slots
@@ -156,6 +158,11 @@ class MainWindow(QMainWindow):
             self.pages[page].navigate_to_file_edit.connect(lambda file_id, edit_mode: self.switch_to_page("FileEdit", {"file_id": file_id, "edit_mode": edit_mode, "new_file": True}))
         elif page == "FileEdit":
             self.pages[page] = FileEditPage(self.session_token, self.account_type, self.user_id, pars["file_id"], pars["edit_mode"], pars["new_file"])
+
+            # Side Bar Slots
+            self.connect_side_bar(page)
+        elif page == "BuyTokens":
+            self.pages[page] = BuyTokensPage(self.session_token, self.account_type, self.user_id)
 
             # Side Bar Slots
             self.connect_side_bar(page)
