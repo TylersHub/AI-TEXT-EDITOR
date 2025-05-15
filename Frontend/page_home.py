@@ -7,8 +7,8 @@ import requests
 
 class HomePage(Page):
     # File Signals
-    navigate_to_file_edit = pyqtSignal(int)
     navigate_to_file_create = pyqtSignal()
+    navigate_to_file_edit = pyqtSignal(int)
 
     def __init__(self, session_token: str, account_type: str, user_id: str):
         super().__init__()
@@ -21,9 +21,7 @@ class HomePage(Page):
         self.central_layout.setContentsMargins(0, 0, 0, 0)
         self.central_layout.setSpacing(0)
 
-        user_name, token_count = self.fetch_side_bar_data()
-
-        self.side_bar = SideBar(account_type, user_name, token_count)
+        self.side_bar = SideBar(account_type, user_id)
         self.central_layout.addWidget(self.side_bar, stretch=1)
 
         self.body_layout = QVBoxLayout()
@@ -37,9 +35,7 @@ class HomePage(Page):
         self.body_layout.addWidget(self.body_header)
 
         if account_type in ("PAID", "SUPER"):
-            submission_count, correction_count, tokens_used = self.fetch_top_bar_data()
-
-            self.top_bar = TopBar(submission_count, correction_count, tokens_used)
+            self.top_bar = TopBar(user_id)
             self.body_layout.addWidget(self.top_bar)
 
         self.file_scroll_area = QScrollArea()
@@ -73,46 +69,6 @@ class HomePage(Page):
         self.new_file_button.clicked.connect(self.navigate_to_file_create.emit)
         self.body_layout.addWidget(self.new_file_button)
         self.body_layout.setAlignment(self.new_file_button, Qt.AlignmentFlag.AlignHCenter)
-
-    def fetch_side_bar_data(self) -> tuple[str, str]:
-        first_name = "?"
-        token_count = "?"
-
-        try:
-            headers = {"Content-Type": "application/json"}
-            
-            response = requests.get(f"http://127.0.0.1:5000/user/sidebar/{self.user_id}", headers=headers)
-            response.raise_for_status()
-
-            data = response.json()
-
-            first_name = data["first_name"]
-            token_count = data["tokens"]
-        except requests.exceptions.RequestException as e:
-            print(f"Error fetching side bar data: {e}")
-
-        return (first_name, token_count)
-
-    def fetch_top_bar_data(self) -> tuple[str, str, str]:
-        submission_count = "?"
-        correction_count = "?"
-        tokens_used = "?"
-
-        try:
-            headers = {"Content-Type": "application/json"}
-            
-            response = requests.get(f"http://127.0.0.1:5000/stats/{self.user_id}", headers=headers)
-            response.raise_for_status()
-
-            data = response.json()
-
-            submission_count = data["total_submissions"]
-            correction_count = data["total_corrections"]
-            tokens_used = data["total_tokens_used"]
-        except requests.exceptions.RequestException as e:
-            print(f"Error fetching top bar data: {e}")
-
-        return (submission_count, correction_count, tokens_used)
 
     def fetch_file_previews(self) -> list[dict]:
         file_previews = []
