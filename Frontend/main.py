@@ -13,6 +13,7 @@ from page_buy_tokens import BuyTokensPage
 from page_blacklist import BlacklistPage
 from page_applications import ApplicationsPage
 from page_rejections import RejectionsPage
+from page_moderation import ModerationPage
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -42,6 +43,7 @@ class MainWindow(QMainWindow):
             "Blacklist": None,
             "Applications": None,
             "Rejections": None,
+            "Moderation": None,
         }
 
         # Page Slots
@@ -184,6 +186,11 @@ class MainWindow(QMainWindow):
             self.connect_side_bar(page)
         elif page == "Rejections":
             self.pages[page] = RejectionsPage(self.session_token, self.account_type, self.user_id)
+
+            # Side Bar Slots
+            self.connect_side_bar(page)
+        elif page == "Moderation":
+            self.pages[page] = ModerationPage(self.session_token, self.account_type, self.user_id)
 
             # Side Bar Slots
             self.connect_side_bar(page)
