@@ -46,11 +46,10 @@ def check_blacklisted_words(text):
 def require_role(roles):
     def decorator(func):
         def wrapper(*args, **kwargs):
-            # Try to get user_id from multiple sources
             user_id = (
-                request.view_args.get('user_id') if request.view_args else None
-                or request.args.get('user_id')
-                or (request.get_json(silent=True) or {}).get('user_id')
+                (request.view_args or {}).get('user_id') or
+                request.args.get('user_id') or
+                (request.get_json(silent=True) or {}).get('user_id')
             )
 
             if not user_id:
@@ -64,3 +63,4 @@ def require_role(roles):
         wrapper.__name__ = func.__name__
         return wrapper
     return decorator
+
