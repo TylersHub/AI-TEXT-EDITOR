@@ -2,6 +2,8 @@ from PyQt6.QtWidgets import QWidget, QLabel, QLineEdit, QPushButton, QSizePolicy
 from PyQt6.QtGui import QColor, QCursor
 from PyQt6.QtCore import Qt, pyqtSignal
 
+import requests
+
 # Color Palette
 primary_color = QColor("#F8F8FF")
 secondary_color = QColor("#7D55C7")
@@ -162,7 +164,7 @@ class SideBar(QWidget):
     navigate_to_complaints = pyqtSignal()
     navigate_to_moderation = pyqtSignal()
     
-    def __init__(self, account_type: str, user_name: str, token_count: int):
+    def __init__(self, account_type: str, user_id: str):
         super().__init__()
 
         self.setStyleSheet(
@@ -171,11 +173,29 @@ class SideBar(QWidget):
             "}"
         )
 
-        self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
+        self.user_name, self.token_count = self.fetch_side_bar_data(user_id)
 
-        self.user_name = user_name
-        self.token_count = token_count
+        self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
         self.__init_body(account_type)
+
+    def fetch_side_bar_data(self, user_id) -> tuple[str, str]:
+        first_name = "?"
+        token_count = "?"
+
+        try:
+            headers = {"Content-Type": "application/json"}
+            
+            response = requests.get(f"http://127.0.0.1:5000/user/sidebar/{user_id}", headers=headers)
+            response.raise_for_status()
+
+            data = response.json()
+
+            first_name = data["first_name"]
+            token_count = data["tokens"]
+        except requests.exceptions.RequestException as e:
+            print(f"Error fetching side bar data: {e}")
+
+        return (first_name, token_count)
 
     def __init_body(self, account_type: str):
         self.central_layout = QVBoxLayout(self)
@@ -272,7 +292,7 @@ class SideBar(QWidget):
         self.navigate_to_sign_in.emit()
 
 class TopBar(QWidget):
-    def __init__(self, file_count: int, correction_count: int, tokens_used: int):
+    def __init__(self, user_id: str):
         super().__init__()
 
         self.setStyleSheet(
@@ -282,8 +302,31 @@ class TopBar(QWidget):
             "}"
         )
 
+        file_count, correction_count, tokens_used = self.fetch_top_bar_data(user_id)
+
         self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
         self.__init_body(file_count, correction_count, tokens_used)
+
+    def fetch_top_bar_data(self, user_id) -> tuple[str, str, str]:
+        submission_count = "?"
+        correction_count = "?"
+        tokens_used = "?"
+
+        try:
+            headers = {"Content-Type": "application/json"}
+            
+            response = requests.get(f"http://127.0.0.1:5000/stats/{user_id}", headers=headers)
+            response.raise_for_status()
+
+            data = response.json()
+
+            submission_count = data["total_submissions"]
+            correction_count = data["total_corrections"]
+            tokens_used = data["total_tokens_used"]
+        except requests.exceptions.RequestException as e:
+            print(f"Error fetching top bar data: {e}")
+
+        return (submission_count, correction_count, tokens_used)
 
     def __init_body(self, file_count: int, correction_count: int, tokens_used: int):
         self.central_layout = QHBoxLayout(self)
